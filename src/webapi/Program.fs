@@ -7,7 +7,7 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open Torpedo.HttpHandlers
+open WebApi.DownloadHandler
 
 // ---------------------------------
 // Web app
@@ -18,12 +18,14 @@ let webApp =
         subRoute "/api"
             (choose [
                 GET >=> choose [
-                    route "/hello" >=> handleGetHello
-                    route "/download" >=> handleGetDownload
+                    route "/" >=> 
+                    route  "/download/"   >=> RequestErrors.badRequest (text "Download endpoint requires a token as route parameter.")
+                    routex "/download/([^\/]*)(/?)" >=> RequestErrors.badRequest (text "To download a file you need to supply an url encoded filename and a download token as route parameters.")
+                    routef "/download/%s/%s" handleGetFileDownload
                 ]
             ])
-        setStatusCode 404 >=> text "Not Found" ]
-
+        setStatusCode 404 >=> text "Page not found" ]
+        
 // ---------------------------------
 // Error handler
 // ---------------------------------

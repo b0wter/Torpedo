@@ -1,78 +1,78 @@
 module WebApi.FileAccess
 open System
-open Microsoft.CodeAnalysis.CSharp
 open System.IO
-open System.Linq.Expressions
-open Torpedo.Models
-open Newtonsoft.Json
+
+type DownloadPair = (string * string)
 
 /// <summary>
-/// Dateiendung für Tokendateien.
+/// File extension for tokens.
 /// </summary>
 let tokenExtension = ".token"
-let fileStorageDirectory = "/home/b0wter/tmp/torpedo/"
 
 /// <summary>
-/// Liefert eine Liste aus Tokendatei und Dateiname für alle Dateien in dem übergebenen Order für die genau eine
-/// .token-Datei und eine andere Datei mit gleichem Namen aber anderer Extension existiert.
+/// Returns a list of (Token filename * content filename) for all files in the given folder.
+/// Only considers those Token files which have exactly one corresponding content file.
+/// (e.g.: cook.png cook.bmp & cook.token would NOT be returned but shark.png & shark.token would be)
 /// </summary>
-let getFilesWithTokens (folder: string): (string * string)[] =
+let getFilesWithTokens (folder: string): DownloadPair[] =
     Directory.GetFiles(folder)
     |> Array.map Path.GetFileName
     |> Array.groupBy (fun name -> Path.GetFileNameWithoutExtension(name))
     |> Array.map     (fun (name,  fullnames)  -> (name, fullnames |> Array.map Path.GetExtension))
     |> Array.filter  (fun (_,     extensions) -> extensions |> Array.exists (fun extension -> extension.EndsWith(tokenExtension)))
     |> Array.filter  (fun (_,     extensions) -> extensions.Length = 2)
-    |> Array.map     (fun (name,  extensions) -> (name + extensions.[0], name + extensions.[1]))
+    |> Array.map     (fun (name,  extensions) -> (Path.Combine(folder, name + extensions.[0]), (Path.Combine(folder, name + extensions.[1]))))
     |> Array.map     (fun (first, second)     -> if first.EndsWith(tokenExtension) then (first, second) else (second, first))
     
-let getDownloadableFiles (folder: string): (string * string)[] =
-    getFilesWithTokens folder
-    |> Array.map     (fun (tokenFile, contentFile) -> (tokenFile, contentFile, JsonConvert.DeserializeObject<TokenCollection>(tokenFile)))
-    |> Array.filter  (fun (_, _, tokenCollection)  -> tokenCollection.ExpirationDate >= DateTime.Now)
-    |> Array.filter  (fun (_, _, tokenCollection)  -> tokenCollection.Tokens 
-                                                      |> Seq.exists (fun element -> match element.ExpirationDate with
-                                                                                    | Some date -> date >= DateTime.Now
-                                                                                    | None      -> true))
-    |> Array.map     (fun (tokenFile, contentFile, _) -> (tokenFile, contentFile))
+/// <summar>
+/// Reads text contents from a file. 
+/// Will throw exceptions if the file is unknown or the contents
+/// cannot be read.
+/// </summary>
+let getTextContent (filename: string) =
+    File.ReadAllText(filename)    
     
 /// <summary>
-/// Prüft ob eine bestimmte Datei downloadbar ist (d.h. eine passende Tokendatei existiert)
-/// und der Token eindeutig dieser Datei zugeordnet werden kann.
+/// Get the timestamp of the last mofication (local system time).
+/// Will throw an exception if the file does not exist.
+/// </summary>    
+let getLastModified (filename: string) =
+    File.GetLastWriteTime(filename)    
+    
+/// <summary>
+/// Retrieves the last modification dates for a list of files.
+/// Will throw an exception if any of the files does not exist.
+/// </summary>    
+let getFileDates (filenames: string seq) =
+    filenames
+    |> Seq.map File.GetLastWriteTime    
+    
+/// <summary>
+/// Checks if the given file is downloadable meaning a matching Token file exists
+/// and the Token is uniquely bound to a single content file.
 /// </summary>
 let existsIn (folder: string) (filename: string): bool =
-    getDownloadableFiles folder |> Array.map snd |> Array.contains filename
+    getFilesWithTokens folder |> Array.map snd |> Array.contains (Path.Combine(folder, filename))
     
-// Download von Dateien laufen über `WriteStreamAsync` und den `StreamData` HTTP Handler.
-// Damit wird am Ende ein `Stream` an den Client geliefert.
+/// <summary>
+/// Tries to open a file stream for the given file. 
+/// Returns Some FileStream if successful otherwise None.
+/// </summary>
 let fileStream (filename: string): FileStream option =
-    let combined = Path.Combine(fileStorageDirectory, filename)
-    let path = Path.GetDirectoryName(combined)
-    let file = Path.GetFileName(filename)
+    let path = Path.GetDirectoryName(filename)
     
-    if file |> existsIn path then 
-        Some (File.OpenRead(combined))
-    else
+    if String.IsNullOrWhiteSpace(path) then 
         None
+    else
+        let file = Path.GetFileName(filename)
         
-let expireTokenInCollection (tokenValue: string ) (collection: TokenCollection) =
-    let newTokens = collection.Tokens
-                    |> Seq.filter (fun t -> t.Value = tokenValue)
-                    |> Seq.map (fun t -> { t with ExpirationDate = Some (DateTime.Now + TimeSpan.FromDays(2.0)) } )
-    { collection with Tokens = newTokens }                
-        
-let setTokenToExpire (filename: string) (tokenValue: string) : bool =
-    let combined = Path.Combine(fileStorageDirectory, filename)
-    let path = Path.GetDirectoryName(combined)
-    let file = Path.GetFileNameWithoutExtension(combined)
-    let tokenFile = Path.Combine(path, file + tokenExtension)
-    
-    if tokenFile |> File.Exists then 
-        File.ReadAllText(tokenFile)
-        |> JsonConvert.DeserializeObject<TokenCollection>
-        |> expireTokenInCollection tokenValue
-        |> JsonConvert.SerializeObject
-        |> (fun serialized -> File.WriteAllText(tokenFile, serialized))
-        true
-    else 
-        false 
+        if file |> existsIn path then 
+            Some (File.OpenRead(filename))
+        else
+            None
+
+/// <summary>
+/// Writes the given content into the given file using the default character encoding.
+/// </summary>
+let persistStringAsFile (filename: string) (content: string) =
+    File.WriteAllText(filename, content)
