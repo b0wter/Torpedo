@@ -23,10 +23,15 @@ type Token =
     
 /// <summary>
 /// Sets the expiration date for a TokenValue inside a Token.
+/// If the TokenValue already has an expiration date it remains unchanged.
 /// </summary>    
 let setExpirationDate (date: DateTime) (token: Token) (tokenvalue: string): Token =
     { token with Values = token.Values |> Seq.map (fun element -> if element.Value = tokenvalue then 
-                                                                    { element with ExpirationDate = Some date } 
+                                                                    match element.ExpirationDate with 
+                                                                    | Some date when date <> Unchecked.defaultof<DateTime> ->
+                                                                        { element with ExpirationDate = Some date }
+                                                                    | _ ->
+                                                                        element
                                                                   else 
                                                                     element)
                                                                   }

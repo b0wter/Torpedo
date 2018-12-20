@@ -34,6 +34,22 @@ Where `cook.png` is an route paramter for the file to download and `abcdef` is t
 
 Last modified file timestamps are used to check if a download is too old to be served. Torpedo uses the token file as reference not the content file.
 
+Configuration
+=============
+The application needs a configuration file to work properly. The file is written in json and looks like this:
+```
+{
+	"configuration":
+	{
+		"BasePath": "/home/b0wter/tmp/torpedo",
+		"DefaultDownloadLifetime": "7.00:00:00",
+		"DefaultTokenLifetime": "2.00:00:00"
+	}
+}
+
+```
+The lifetimes are given in the format: `$Days.$Hours:$Minutes:$Seconds`.
+
 Todo
 ====
 * Crons to periodically delete old files.
