@@ -1,0 +1,44 @@
+#footer {
+   position:absolute;
+   bottom:0;
+   width: calc(100% - 16px);
+   height:40px;   /* Height of the footer */
+}
+
+#background {
+   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#30074f+0,000000+100 */
+   height: 100%;
+   background: #170433; /* Old browsers */
+   background: -moz-linear-gradient(top, #170433 0%, #111111 100%); /* FF3.6-15 */
+   background: -webkit-linear-gradient(top, #170433 0%, #111111 100%); /* Chrome10-25,Safari5.1-6 */
+   background: linear-gradient(to bottom, #170433 0%, #111111 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#170433', endColorstr='#111111', GradientType=0); /* IE6-9 */
+}
+.transparent {
+   background: transparent !important;
+}
+
+#outer {
+   display: table;
+   position: absolute;
+   top: 0;
+   left: 0;
+   height: 100%;
+   width: 100%;
+}
+
+#middle {
+   display: table-cell;
+   vertical-align: middle;
+}
+
+#inner {
+   margin-left: auto;
+   margin-right: auto;
+   width: 400px;
+   /*whatever width you want*/
+}
+
+.button-margin {
+   margin: 8px
+}

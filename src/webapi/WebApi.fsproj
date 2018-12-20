@@ -12,6 +12,7 @@
     <Compile Include="TokenSerializer.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="FileAccess.fs" />
+    <Compile Include="Views.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="DownloadHandler.fs" />
     <Compile Include="Program.fs" />
@@ -23,6 +24,7 @@
     <PackageReference Include="Hangfire" Version="1.6.21" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.4" />
@@ -33,6 +35,16 @@
     <None Include="web.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\css\custom.css" />
+    <Content Include="wwwroot\css\mini-dark.min.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images" />
+    <Folder Include="wwwroot\js" />
   </ItemGroup>
 
 </Project>

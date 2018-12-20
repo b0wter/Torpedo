@@ -8,6 +8,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 open Microsoft.Extensions.Primitives
 open Giraffe
 open WebApi
+open WebApi
 open WebApi.Configuration
         
 /// <summary>
@@ -30,7 +31,8 @@ let defaultTokenLifeTime = TimeSpan.FromDays(2.0)
 /// </summary>
 let create404 (ctx: HttpContext) (next: HttpFunc) responseText =
     ctx.Response.StatusCode <- 404
-    (text responseText) next ctx    
+    Views.badRequestView responseText |> htmlView
+    // (text responseText) next ctx    
 
 /// <summary>
 /// Asynchronously writes a FileStream into a HTTP response.
@@ -49,7 +51,7 @@ let private getFileStreamResponseAsync file downloadname (ctx: HttpContext) (nex
                 None
                 None
         | None ->
-            return! (create404 ctx next "Download stream not set. Please contact the administrator.")
+            return! (create404 ctx next "Download stream not set. Please contact the administrator.") next ctx
     }
         
 /// <summary>
@@ -86,8 +88,8 @@ let handleGetFileDownload (filename: string, tokenValue: string) : HttpHandler =
                     
                     getFileStreamResponseAsync contentfilename filename ctx next 
                 else 
-                    notAvailableBecause "Unknown token."
+                    notAvailableBecause "Unknown token." next ctx
             | Error err ->
-                notAvailableBecause "Could not read token file. Please contact the system administrator."
+                notAvailableBecause "Could not read token file. Please contact the system administrator." next ctx
         | None ->
-            notAvailableBecause (sprintf "The download is either unknown or has expired. The default lifetime of a download is %.1f days and it will expire %.1f days after you first download attempt." downloadLifeTime.TotalDays tokenLifeTime.TotalDays)
+            notAvailableBecause (sprintf "The download is either unknown or has expired. The default lifetime of a download is %.1f days and it will expire %.1f days after you first download attempt." downloadLifeTime.TotalDays tokenLifeTime.TotalDays) next ctx

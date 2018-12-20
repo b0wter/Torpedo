@@ -6,9 +6,12 @@ open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.AspNetCore.StaticFiles
+open Giraffe
 open Giraffe
 open Microsoft.Extensions.Configuration
 open Torpedo
+open WebApi
 open WebApi.DownloadHandler
 
 let mutable config: IConfiguration option = None
@@ -23,12 +26,13 @@ let webApp =
             (choose [
                 GET >=> choose [
                     route "/" >=> 
-                    route  "/download/"             >=> RequestErrors.badRequest (text "Download endpoint requires a token as route parameter.")
-                    routex "/download/([^\/]*)(/?)" >=> RequestErrors.badRequest (text "To download a file you need to supply an url encoded filename and a download token as route parameters.")
+                    route  "/download(/?)"          >=> setStatusCode 500 >=> (Views.badRequestView "Download endpoint requires a token as route parameter." |> htmlView) 
+                    routex "/download/([^\/]*)(/?)" >=> setStatusCode 500 >=> (Views.badRequestView "To download a file you need to supply an url encoded filename and a download token as route parameters." |> htmlView)
                     routef "/download/%s/%s"        handleGetFileDownload
                 ]
             ])
-        setStatusCode 404 >=> text "Page not found" ]
+        route "/" >=> (Views.indexView |> htmlView)
+        setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
         
 // ---------------------------------
 // Error handler
@@ -61,6 +65,7 @@ let configureApp (app : IApplicationBuilder) =
     | true  -> app.UseDeveloperExceptionPage()
     | false -> app.UseGiraffeErrorHandler errorHandler)
         .UseHttpsRedirection()
+        .UseStaticFiles()
         .UseCors(configureCors)
         .UseGiraffe(webApp)
 
@@ -83,6 +88,7 @@ let main _ =
         .UseKestrel()
         .UseIISIntegration()
         .UseConfiguration(buildIConfiguration)
+        .UseWebRoot(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"))
         .Configure(Action<IApplicationBuilder> configureApp)
         .ConfigureServices(configureServices)
         .ConfigureLogging(configureLogging)
