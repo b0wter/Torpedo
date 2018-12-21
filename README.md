@@ -29,7 +29,7 @@ The first value `abcdef` has not been used and therefor does not have an expirat
 Download likes look like this:
 
 ```
-https://myserver/api/downloads?filename=cook.png&token=abcdef
+https://myserver/api/download?filename=cook.png&token=abcdef
 ```
 
 Where `cook.png` is a route paramter for the file to download and `abcdef` is the validation token.
