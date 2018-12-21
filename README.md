@@ -64,6 +64,11 @@ docker run -d --restart=always -p 8080:80 --mount type=bind,source=/home/b0wter/
 ```
 It is possible to use another folder as `/app/content/` inside the container but that requires you to supply a custom `config.json` as bind-mount.
 
+To build your own image you only need the docker runtime. Run the following command from the folder of the cloned repository:
+```
+docker build -t torpedo .
+```
+
 HTTPS
 =====
 Currently there is no native support for certificates. I recommend running this app behind a reverse proxy (which may offer https).
