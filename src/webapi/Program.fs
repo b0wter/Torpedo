@@ -2,6 +2,7 @@
 
 open System
 open System.Globalization
+open System.Reflection.Metadata
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -9,12 +10,9 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.StaticFiles
 open Giraffe
-open Giraffe
 open Microsoft.Extensions.Configuration
 open Torpedo
 open WebApi
-open WebApi
-open WebApi.DownloadHandler
 
 let mutable config: IConfiguration option = None
 
@@ -26,17 +24,20 @@ let invariant = CultureInfo.InvariantCulture
 
 let webApp =
     choose [
+        route "/api/download" >=> DownloadHandler.handleGetFileDownload
+        (*
         subRoute "/api"
             (choose [
                 GET >=> choose [
-                    route  "/download(/?)"          >=> setStatusCode 500 >=> (Views.badRequestView "Download endpoint requires a token as route parameter." |> htmlView) 
-                    routex "/download/([^\/]*)(/?)" >=> setStatusCode 500 >=> (Views.badRequestView "To download a file you need to supply an url encoded filename and a download token as route parameters." |> htmlView)
-                    routef "/download/%s/%s"        handleGetFileDownload
+                    route  "/download(/?)" >=> DownloadHandler.handleGetFileDownload           //>=> setStatusCode 500 >=> (Views.badRequestView "Download endpoint requires a token as route parameter." |> htmlView) 
+                    //routex "/download/([^\/]*)(/?)" >=> setStatusCode 500 >=> (Views.badRequestView "To download a file you need to supply an url encoded filename and a download token as route parameters." |> htmlView)
+                    //routef "/download/%s/%s"        handleGetFileDownload
                 ]
-                POST >=> choose [
-                    route "/download(/?)"           >=> bindForm<Models.Download> (Some invariant) (fun d -> handleGetFileDownload (d.Filename, d.Token))
-                ]
+                //POST >=> choose [
+                //    route "/download(/?)"           >=> bindForm<Models.Download> (Some invariant) (fun d -> handleGetFileDownload (d.Filename, d.Token))
+                //]
             ])
+            *)
         route "/" >=> (Views.indexView |> htmlView)
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
         

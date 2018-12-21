@@ -1,5 +1,5 @@
 function redirectToDownload(filename, token) {
-    window.location.href = "/" + filename + "/" + token;
+    window.location.href = "/api/download?filename=" + filename + "&token=" + token;
 }
 
 function getFilenameValue() {

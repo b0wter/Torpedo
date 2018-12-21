@@ -1,4 +1,5 @@
 module WebApi.Helpers
+open System.Runtime.CompilerServices
 
 /// <summary>
 /// Maps a collection, applies a filter and then uses another mapping to return the collection to its original type.
@@ -22,3 +23,8 @@ let filterOks (items: Result<'a, 'b> seq) : 'a seq =
                             | Error _    -> None)
     |> Seq.choose id                            
                             
+[<Extension>]
+type System.String with
+    static member IsNotNullOrWhiteSpace(s: string): bool =
+        System.String.IsNullOrWhiteSpace(s) = false
+        

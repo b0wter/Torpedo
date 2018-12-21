@@ -1,6 +1,7 @@
 module WebApi.TokenSerializer
 open System
 open WebApi.Tokens
+open WebApi.Helpers
 
 /// <summary>
 /// Defines the type of content used to deserialized from.
@@ -55,9 +56,13 @@ let deserializeToken (filename: string) (content: TokenValueContent) : Result<To
     let lines = match content with 
                 | AsLines l -> l
                 | AsTotal t -> t.Split(Environment.NewLine)
+                |> Array.filter String.IsNotNullOrWhiteSpace
                 
     let parsed = lines
                  |> Array.map deserializeTokenValue                
+                 |> Array.map (fun t -> match t with 
+                                           | Ok token -> if String.IsNullOrWhiteSpace(token.Value) then (Error "Token has empty value.") else (Ok token)
+                                           | Error err -> Error err)
     
     if parsed |> Helpers.containsError then
         Error "Could not deserialize the token."                                                       

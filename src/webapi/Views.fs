@@ -38,6 +38,11 @@ let headTags =
         meta [ _name "msapplication-TileImage"; _content "/ms-icon-144x144.png" ]
         meta [ _name "theme-color"; _content "#ffffff" ]
     ]
+    
+let footerView =
+    div [ _id "footer" ] [
+        img [ _src "/images/logo_white.png"; _id "footer-image" ]
+    ]
 
 let masterView (content: XmlNode list) =
     html [ _id "background" ] [
@@ -51,6 +56,8 @@ let masterView (content: XmlNode list) =
                         content
                 ]
             ]
+            
+            footerView
         ]
     ]
     
