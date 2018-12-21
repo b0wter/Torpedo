@@ -41,12 +41,9 @@ Configuration
 The application needs a configuration file to work properly. The file is written in json and looks like this:
 ```
 {
-	"configuration":
-	{
-		"BasePath": "/home/b0wter/tmp/torpedo",
-		"DefaultDownloadLifetime": "7.00:00:00",
-		"DefaultTokenLifetime": "2.00:00:00"
-	}
+	"BasePath": "/home/b0wter/tmp/torpedo",
+	"DefaultDownloadLifetime": "7.00:00:00",
+	"DefaultTokenLifetime": "2.00:00:00"
 }
 
 ```
