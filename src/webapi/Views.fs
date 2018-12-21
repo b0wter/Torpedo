@@ -61,15 +61,18 @@ let masterView (content: XmlNode list) =
         ]
     ]
     
+let inputBoxView =     
+    div [ _class "input-group vertical" ] [
+        input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
+        input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
+        button [ _type "button"; _onclick "readAndRedirect()"; _id "download-button" ] [ str "Download" ]
+    ]
+    
 let indexView =
     [
         h1 [] [ str "Welcome to Torpedo" ]
         p [] [ str "Enter the filename and your download token into the fields below." ]
-        div [ _class "input-group vertical" ] [
-            input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
-            input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-            button [ _type "button"; _onclick "readAndRedirect()"; _id "download-button" ] [ str "Download" ]
-        ]
+        inputBoxView
     ]
     |> masterView
     
@@ -77,6 +80,8 @@ let badRequestView (message: string) =
     [
         h1 [] [ str "500"]
         p [] [ str message ]
+        p [] [ str "Try again :)" ]
+        inputBoxView
     ]    
     |> masterView
     
@@ -84,5 +89,7 @@ let notFoundView (message: string) =
     [
         h1 [] [ str "404" ]
         p [] [ str message ]
+        p [] [ str "Try again :)" ]
+        inputBoxView
     ]
     |> masterView
