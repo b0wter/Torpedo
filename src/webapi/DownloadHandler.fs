@@ -59,7 +59,7 @@ let private getFileStreamResponseAsync file downloadname (ctx: HttpContext) (nex
 /// </summary>        
 let handleGetFileDownload (filename: string, tokenValue: string) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
-        
+        let filename = System.Net.WebUtility.UrlDecode(filename)
         // Create some abbreviations.
         let notAvailableBecause = create404 ctx next
         let basePath = Configuration.Instance.BasePath

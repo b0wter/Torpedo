@@ -40,11 +40,34 @@
   <ItemGroup>
     <Content Include="wwwroot\css\custom.css" />
     <Content Include="wwwroot\css\mini-dark.min.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\images" />
-    <Folder Include="wwwroot\js" />
+    <Content Include="wwwroot\images\favicon\android-icon-144x144.png" />
+    <Content Include="wwwroot\images\favicon\android-icon-192x192.png" />
+    <Content Include="wwwroot\images\favicon\android-icon-36x36.png" />
+    <Content Include="wwwroot\images\favicon\android-icon-48x48.png" />
+    <Content Include="wwwroot\images\favicon\android-icon-72x72.png" />
+    <Content Include="wwwroot\images\favicon\android-icon-96x96.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-114x114.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-120x120.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-144x144.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-152x152.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-180x180.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-57x57.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-60x60.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-72x72.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-76x76.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon-precomposed.png" />
+    <Content Include="wwwroot\images\favicon\apple-icon.png" />
+    <Content Include="wwwroot\images\favicon\browserconfig.xml" />
+    <Content Include="wwwroot\images\favicon\favicon-16x16.png" />
+    <Content Include="wwwroot\images\favicon\favicon-32x32.png" />
+    <Content Include="wwwroot\images\favicon\favicon-96x96.png" />
+    <Content Include="wwwroot\images\favicon\favicon.ico" />
+    <Content Include="wwwroot\images\favicon\manifest.json" />
+    <Content Include="wwwroot\images\favicon\ms-icon-144x144.png" />
+    <Content Include="wwwroot\images\favicon\ms-icon-150x150.png" />
+    <Content Include="wwwroot\images\favicon\ms-icon-310x310.png" />
+    <Content Include="wwwroot\images\favicon\ms-icon-70x70.png" />
+    <Content Include="wwwroot\js\custom.js" />
   </ItemGroup>
 
 </Project>

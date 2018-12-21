@@ -36,9 +36,22 @@
    margin-left: auto;
    margin-right: auto;
    width: 400px;
-   /*whatever width you want*/
 }
 
 .button-margin {
    margin: 8px
+}
+
+#download-button {
+   background: white;
+   border-radius: 500px;
+   color: black;
+}
+
+#download-button:hover {
+   background: #a380d6;
+}
+
+#download:hover {
+   border-color: #a380d6;
 }

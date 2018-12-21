@@ -1,6 +1,7 @@
 ﻿module Torpedo.App
 
 open System
+open System.Globalization
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -12,6 +13,7 @@ open Giraffe
 open Microsoft.Extensions.Configuration
 open Torpedo
 open WebApi
+open WebApi
 open WebApi.DownloadHandler
 
 let mutable config: IConfiguration option = None
@@ -20,15 +22,19 @@ let mutable config: IConfiguration option = None
 // Web app
 // ---------------------------------
 
+let invariant = CultureInfo.InvariantCulture
+
 let webApp =
     choose [
         subRoute "/api"
             (choose [
                 GET >=> choose [
-                    route "/" >=> 
                     route  "/download(/?)"          >=> setStatusCode 500 >=> (Views.badRequestView "Download endpoint requires a token as route parameter." |> htmlView) 
                     routex "/download/([^\/]*)(/?)" >=> setStatusCode 500 >=> (Views.badRequestView "To download a file you need to supply an url encoded filename and a download token as route parameters." |> htmlView)
                     routef "/download/%s/%s"        handleGetFileDownload
+                ]
+                POST >=> choose [
+                    route "/download(/?)"           >=> bindForm<Models.Download> (Some invariant) (fun d -> handleGetFileDownload (d.Filename, d.Token))
                 ]
             ])
         route "/" >=> (Views.indexView |> htmlView)

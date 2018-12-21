@@ -14,7 +14,7 @@ E.g. you have the files `cook.png` and `my_zipped_secret.zip` you need to add:
 * `cook.token` and
 * `my_zipped_secret.token`
 
-These files are simple text files that contain an arbitrary number of lines. Each of these lines is interpreted as token.
+These files are simple text files that contain an arbitrary number of lines. Each of these lines is interpreted as a token.
 A file might look like this:
 
 ```
@@ -30,7 +30,7 @@ Download likes look like this:
 https://myserver/api/downloads/cook.png/abcdef
 ```
 
-Where `cook.png` is an route paramter for the file to download and `abcdef` is the validation token.
+Where `cook.png` is a route paramter for the file to download and `abcdef` is the validation token.
 
 Last modified file timestamps are used to check if a download is too old to be served. Torpedo uses the token file as reference not the content file.
 
@@ -49,9 +49,8 @@ The application needs a configuration file to work properly. The file is written
 
 ```
 The lifetimes are given in the format: `$Days.$Hours:$Minutes:$Seconds`.
+The `BasePath` is the path to the files where you store your downloads. Please make sure that the user running this app has read/write access (write access is needed to periodically delete old downloads).
 
 Todo
 ====
 * Crons to periodically delete old files.
-* Configuration files.
-* Url decode filenames.
