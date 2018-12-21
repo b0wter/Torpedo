@@ -6,6 +6,8 @@ The links will expire automatically based on either of two conditions:
 * If the download is older than X days.
 * If the token (see below) has expired.
 
+The project is fully usable except for the automatic removal of old downloads.
+
 How To
 ======
 For each downloadable file in your downloads folder you need to create a text file with the extension ".token".
@@ -50,6 +52,24 @@ The application needs a configuration file to work properly. The file is written
 ```
 The lifetimes are given in the format: `$Days.$Hours:$Minutes:$Seconds`.
 The `BasePath` is the path to the files where you store your downloads. Please make sure that the user running this app has read/write access (write access is needed to periodically delete old downloads).
+
+Docker
+======
+To use Torpedo from inside a Docker container you'll need to do the following:
+
+* Create folder on your host system for your downloads, e.g. `/srv/torpedo`.
+* Create a configuration file with `BasePath` set to `/app/content` (see Configuration part, or simply use the config_docker.json in this repo)).
+* Use the following parameters for your docker run: `-p 8080:80 --mount type=bind,source=/your/local/folder/,target=/app/content/`
+
+A full command might look like this:
+```
+docker run -d --restart=always -p 8080:80 --mount type=bind,source=/home/b0wter/tmp/torpedo,target=/app/content/  --name mytorpedo torpedo
+```
+It is possible to use another folder as `/app/content/` inside the container but that requires you to supply a custom `config.json` as bind-mount.
+
+HTTPS
+=====
+Currently there is no native support for certificates. I recommend running this app behind a reverse proxy (which may offer https).
 
 Todo
 ====

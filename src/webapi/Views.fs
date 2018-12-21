@@ -34,9 +34,9 @@ let headTags =
         link [ _rel "icon"; _type "image/png"; _sizes "96x96";    _href "/images/favicon/favicon-96x96.png" ]
         link [ _rel "icon"; _type "image/png"; _sizes "16x16";    _href "/images/favicon/favicon-16x16.png" ]
         link [ _rel "manifest"; _href "/manifest.json" ]
-        meta [ _name "msapplication-TileColor"; _content "#ffffff" ]
+        meta [ _name "msapplication-TileColor"; _content "#170433" ]
         meta [ _name "msapplication-TileImage"; _content "/ms-icon-144x144.png" ]
-        meta [ _name "theme-color"; _content "#ffffff" ]
+        meta [ _name "theme-color"; _content "#170433" ]
     ]
     
 let footerView =

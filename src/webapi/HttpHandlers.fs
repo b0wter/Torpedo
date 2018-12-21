@@ -1,4 +1,5 @@
 namespace WebApi
+open Giraffe.HttpStatusCodeHandlers
 
 module HttpHandlers =
 
@@ -10,4 +11,4 @@ module HttpHandlers =
     open Giraffe
     open WebApi
             
-// Room for additional HTTP handlers (non api).    
+// Room for additional HTTP handlers (non api).

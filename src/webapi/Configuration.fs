@@ -1,5 +1,6 @@
 module WebApi.Configuration
 
+open Newtonsoft.Json
 open System
 
 /// <summary>
@@ -7,7 +8,8 @@ open System
 /// (see Program.fs -> tryBindConfiguration)
 /// </summary>
 type Configuration() =
-        static let instance = Configuration ()
+        [<JsonIgnore>]
+        static let mutable instance = Configuration ()
         let mutable basePath: string = ""
         let mutable defaultDownloadLifeTime: TimeSpan = TimeSpan.FromDays(7.0)
         let mutable defaultTokenLifeTime: TimeSpan = TimeSpan.FromDays(2.0)
@@ -15,7 +17,10 @@ type Configuration() =
         /// <summary>
         /// Use this Singleton to access the configuration from anywhere.
         /// </summary>
-        static member Instance = instance
+        [<JsonIgnore>]
+        static member Instance 
+            with get() = instance
+            and set(value) = instance <- value
         
         /// <summary>
         /// Path to the downloads folder.
@@ -38,4 +43,3 @@ type Configuration() =
         member this.DefaultTokenLifeTime
             with get() = defaultTokenLifeTime
             and  set(value) = defaultTokenLifeTime <- value
-

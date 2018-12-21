@@ -1,5 +1,5 @@
 {
-	"BasePath": "/home/b0wter/tmp/torpedo",
+	"BasePath": "/app/content/",
 	"DefaultDownloadLifetime": "6.00:00:00",
 	"DefaultTokenLifetime": "3.00:00:00"
 }
