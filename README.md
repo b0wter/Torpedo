@@ -62,7 +62,7 @@ To use Torpedo from inside a Docker container you'll need to do the following:
 
 A full command might look like this:
 ```
-docker run -d --restart=always -p 8080:80 --mount type=bind,source=/home/b0wter/tmp/torpedo,target=/app/content/  --name mytorpedo torpedo
+docker run -d --restart=always -p 8080:80 --mount type=bind,source=/home/b0wter/tmp/torpedo,target=/app/content/  --name mytorpedo b0wter/torpedo
 ```
 It is possible to use another folder as `/app/content/` inside the container but that requires you to supply a custom `config.json` as bind-mount.
 
@@ -70,6 +70,9 @@ To build your own image you only need the docker runtime. Run the following comm
 ```
 docker build -t torpedo .
 ```
+
+Images are auto-generated from this repository and can be found on [Docker Hub](https://cloud.docker.com/repository/docker/b0wter/torpedo/general).
+
 
 HTTPS
 =====
