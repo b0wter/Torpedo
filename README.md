@@ -1,3 +1,5 @@
+![Torpedo Logo](https://github.com/b0wter/Torpedo/blob/master/assets/logo_small.png)
+
 Goal
 ====
 Torpedo is a small web server that is designed to share downloadable files with your friends.
