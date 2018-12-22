@@ -1,8 +1,9 @@
 #footer {
    position:absolute;
    bottom:0;
-   width: calc(100% - 16px);
+   width: 100%;
    height: 100px;
+   background: #111111;
 }
 
 #footer-image {
@@ -41,7 +42,7 @@
 #inner {
    margin-left: auto;
    margin-right: auto;
-   width: 400px;
+   max-width: 400px;
 }
 
 .button-margin {
