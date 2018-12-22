@@ -80,9 +80,8 @@ let handleGetFileDownload : HttpHandler =
                 // Get the tuple containing the token and content filename.
                 let downloadPair = basePath 
                                    |> FileAccess.getFilesWithTokens
-                                   |> Helpers.mapFilterRemap (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
-                                                             (fun (lastmodified, tuple) -> tuple)
-                                                             (fun (lastmodified, _) -> (DateTime.Now - downloadLifeTime) <= lastmodified)
+                                   |> Helpers.mappedFilter (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
+                                                           (fun (lastmodified, _) -> (DateTime.Now - downloadLifeTime) <= lastmodified)
                                    |> Seq.tryFind (fun (_, contentfile) -> IO.Path.GetFileName(contentfile) = filename)
                                    
                 match downloadPair with 

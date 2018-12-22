@@ -2,10 +2,13 @@ module WebApi.Helpers
 open System.Runtime.CompilerServices
 
 /// <summary>
-/// Maps a collection, applies a filter and then uses another mapping to return the collection to its original type.
+/// Maps items of a collection and runs a filter afterwards. The original item is returned for all mapped items that passed the filter.
 /// </summary>
-let mapFilterRemap (forth: 'a->'b) (back: 'b->'a) (predicate: 'b -> bool) (items: 'a seq) : 'a seq =
-    items |> Seq.map forth |> Seq.filter predicate |> Seq.map back
+let mappedFilter (transformation: 'a->'b) (predicate: 'b -> bool) (items: 'a seq) : 'a seq =
+    items 
+    |> Seq.map (fun item -> (item, item |> transformation ))
+    |> Seq.filter (fun (_, mappedItem) -> mappedItem |> predicate)
+    |> Seq.map fst
 
 /// <summary>
 /// Checks if a collection of Result<...,...> contains at least one error value.
