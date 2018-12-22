@@ -10,6 +10,8 @@ The links will expire automatically based on either of two conditions:
 
 The project is fully usable except for the automatic removal of old downloads.
 
+![Screenshot](https://user-images.githubusercontent.com/614261/50368705-148f3280-058c-11e9-9482-2bb5810b88c0.png)
+
 How To
 ======
 For each downloadable file in your downloads folder you need to create a text file with the extension ".token".
