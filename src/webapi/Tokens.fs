@@ -30,6 +30,8 @@ let setExpirationDate (date: DateTime) (token: Token) (tokenvalue: string): Toke
                                                                     match element.ExpirationDate with 
                                                                     | Some date when date <> Unchecked.defaultof<DateTime> ->
                                                                         { element with ExpirationDate = Some date }
+                                                                    | None ->
+                                                                        { element with ExpirationDate = Some date }
                                                                     | _ ->
                                                                         element
                                                                   else 

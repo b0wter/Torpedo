@@ -37,6 +37,8 @@ let headTags =
         meta [ _name "msapplication-TileColor"; _content "#170433" ]
         meta [ _name "msapplication-TileImage"; _content "/ms-icon-144x144.png" ]
         meta [ _name "theme-color"; _content "#170433" ]
+        
+        meta [ _name "viewport"; _content "width=device-width, initial-scale=1"]
     ]
     
 let footerView =

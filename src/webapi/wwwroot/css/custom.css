@@ -13,7 +13,7 @@
 
 #background {
    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#30074f+0,000000+100 */
-   height: 100%;
+   height: calc(100% - 100px);
    background: #170433; /* Old browsers */
    background: -moz-linear-gradient(top, #170433 0%, #111111 100%); /* FF3.6-15 */
    background: -webkit-linear-gradient(top, #170433 0%, #111111 100%); /* Chrome10-25,Safari5.1-6 */
