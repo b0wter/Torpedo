@@ -75,6 +75,20 @@ HTTPS
 =====
 Currently there is no native support for certificates. I recommend running this app behind a reverse proxy (which may offer https).
 
+Creating downloads
+==================
+Downloads can easily be created manually. However, this repository contains a bash script that makes creating downloads even easiert. It takes (at least) three parameters:
+
+1. the path to your downloads directory
+2. the name of the new 7z download (downloads created by this script are always zipped and encrypted)
+3. A list of files to be added to the 7z file (may contain wildcards).
+
+```
+./create_download.sh /srv/torpedo new_download.7z /home/b0wter/downloads/linux_isos/*
+```
+
+This will automatically create a random password (using /dev/random), zip the given files, copy the zip to the destination folder and create a new token file with a random token. Please make sure that you write down the password created for the new download as it cannot be recovered!
+
 Todo
 ====
 * Crons to periodically delete old files.
