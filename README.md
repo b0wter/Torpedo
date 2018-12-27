@@ -73,7 +73,7 @@ To build your own image you only need the docker runtime. Run the following comm
 docker build -t torpedo .
 ```
 
-Images are auto-generated from this repository and can be found on [Docker Hub](https://cloud.docker.com/repository/docker/b0wter/torpedo/general).
+Images are auto-generated from this repository and can be found on [Docker Hub](https://hub.docker.com/r/b0wter/torpedo).
 
 
 HTTPS
