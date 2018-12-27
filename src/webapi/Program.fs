@@ -15,6 +15,7 @@ open Microsoft.Extensions.Configuration
 open Newtonsoft.Json
 open Torpedo
 open WebApi
+open WebApi.DownloadHandler
 
 // ---------------------------------
 // Web app
@@ -24,7 +25,12 @@ let invariant = CultureInfo.InvariantCulture
 
 let webApp =
     choose [
-        route "/api/download" >=> DownloadHandler.handleGetFileDownload
+        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true >=> requiresExistanceOfFileInContext >=> getDownloadFilestream >=> HttpHandlers.renderErrorCode
+        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true >=> (Views.internalErrorView "The file could not be found." |> htmlView)
+        route "/api/download" >=> requiresQueryParameters [| "filename" |] false >=> requiresExistanceOfFileInContext >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
+        route "/api/download" >=> requiresQueryParameters [| "token" |] false >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
+        route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
+        
         route "/" >=> (Views.indexView |> htmlView)
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
         

@@ -1,6 +1,8 @@
 module WebApi.Views
 
-open Giraffe
+open System.Net
+open System.Threading.Tasks
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
 
@@ -80,7 +82,7 @@ let indexView =
     
 let badRequestView (message: string) =
     [
-        h1 [] [ str "500"]
+        h1 [] [ str "400"]
         p [] [ str message ]
         p [] [ str "Try again :)" ]
         inputBoxView
@@ -90,6 +92,15 @@ let badRequestView (message: string) =
 let notFoundView (message: string) =
     [
         h1 [] [ str "404" ]
+        p [] [ str message ]
+        p [] [ str "Try again :)" ]
+        inputBoxView
+    ]
+    |> masterView
+    
+let internalErrorView (message: string) =
+    [
+        h1 [] [ str "500" ]
         p [] [ str message ]
         p [] [ str "Try again :)" ]
         inputBoxView
