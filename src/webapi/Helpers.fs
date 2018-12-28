@@ -34,6 +34,10 @@ let filterOks (items: Result<'a, 'b> seq) : 'a seq =
                             | Error _    -> None)
     |> Seq.choose id                            
                             
+/// <summary>
+/// Adds or appends a string with a given key to the given dictionary.
+/// In case the key exists the string is appended else it is added.
+/// </summary>
 let appendTo (items: IDictionary<obj, obj>) (key: string) (value: string) =
     match items.ContainsKey(key) with 
     | true ->
@@ -43,6 +47,9 @@ let appendTo (items: IDictionary<obj, obj>) (key: string) (value: string) =
         items.Add(key, value)
         items
                             
+/// <summary>
+/// Adds a string value with a string key to the dictionary in case the key does not exist.
+/// </summary>
 let addIfNotExisting (items: IDictionary<obj, obj>) (key: string) (value: string) =
     match items.ContainsKey(key) with 
     | true ->
