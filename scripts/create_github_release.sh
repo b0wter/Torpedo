@@ -5,18 +5,20 @@ OWNER=b0wter
 REMOTE=https://api.github.com
 VERSIONS=(fedora-x64 ubuntu-x64 linux-x64 win10-x64 osx-x64)
 
+cd ..
+
 # Includes only one line:
 # GITHUB_ACCESS_KEY=my_access_key
 # You can create an OAuth key from your profile's developer settings.
-source credentials.sh
+source scripts/credentials.sh
 # Creates a new release for the current commit or retrieves the tag set for this commit.
-source git_release.sh
+source scripts/git_release.sh
 echo "The working tag is: $NEW_TAG."
 
 #
 # Create binaries.
 #
-source publish.sh
+source scripts/publish.sh
 
 #
 # Create Github release.
@@ -41,5 +43,5 @@ for ARCHITECTURE in ${VERSIONS[@]}; do
 	curl --header "Authorization: token $GITHUB_ACCESS_KEY" \
 	     --header "Content-Type: application/zip" \
 	     --data-binary "@out/torpedo_${ARCHITECTURE}_${NEW_TAG}.zip" \
-             $UPLOAD_URL?name=torpedo_$ARCHITECTURE.zip
+             $UPLOAD_URL?name=torpedo_${ARCHITECTURE}_${NEW_TAG}.zip
 done
