@@ -52,7 +52,20 @@ let getFileDates (filenames: string seq) =
 /// and the Token is uniquely bound to a single content file.
 /// </summary>
 let existsIn (folder: string) (filename: string): bool =
-    getFilesWithTokens folder |> Array.map snd |> Array.contains (Path.Combine(folder, filename))
+    if folder.Contains("..") || filename.Contains("..") then 
+        false 
+    else
+        getFilesWithTokens folder |> Array.map snd |> Array.contains (Path.Combine(folder, filename))
+    
+/// <summary>
+/// Interprets the filename as a combination of directory and filename and checks if it exists.
+/// Will always return false if there is a ".." in the filename.
+/// </summary>    
+let fileExists (filename: string) : bool =
+    if filename.Contains("..") then
+        false 
+    else
+        File.Exists filename
     
 /// <summary>
 /// Tries to open a file stream for the given file. 

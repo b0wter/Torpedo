@@ -15,6 +15,8 @@ open Microsoft.Extensions.Configuration
 open Newtonsoft.Json
 open Torpedo
 open WebApi
+open WebApi.DownloadHandler
+open WebApi.HttpHandlers
 
 // ---------------------------------
 // Web app
@@ -22,9 +24,39 @@ open WebApi
 
 let invariant = CultureInfo.InvariantCulture
 
+/// <summary>
+/// Checks if the file set as base path in the configuration file exists.
+/// This check is necessary due to a bug in the .net core 2.1 framework.
+/// Throwing an exception or using Environment.Exit(...) leads to a deadlock
+/// while shutting the application down.
+/// </summary>
+let updateConfigFromLocalFile =
+    if System.IO.File.Exists("config.json") then 
+        let config = System.IO.File.ReadAllText("config.json")
+                     |> JsonConvert.DeserializeObject<Configuration.Configuration>
+        do Configuration.Configuration.Instance <- config
+        true
+    else
+        false
+        
+let downloadFile =
+    getDownloadFilestream 
+        Configuration.Configuration.Instance.BasePath
+        Configuration.Configuration.Instance.DefaultDownloadLifeTime
+        Configuration.Configuration.Instance.DefaultTokenLifeTime
+        
+let requiresExistanceOfFile =
+    requiresExistanceOfFileInContext
+        Configuration.Configuration.Instance.BasePath
+        
 let webApp =
     choose [
-        route "/api/download" >=> DownloadHandler.handleGetFileDownload
+        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> requiresExistanceOfFile >=> downloadFile >=> renderErrorCode
+        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> (Views.internalErrorView "The file could not be found." |> htmlView)
+        route "/api/download" >=> requiresQueryParameters [| "filename" |]          false >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
+        route "/api/download" >=> requiresQueryParameters [| "token" |]             false >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
+        route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
+        
         route "/" >=> (Views.indexView |> htmlView)
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
         
@@ -65,21 +97,6 @@ let configureLogging (builder : ILoggingBuilder) =
            .AddConsole()
            .AddDebug() |> ignore
 
-/// <summary>
-/// Checks if the file set as base path in the configuration file exists.
-/// This check is necessary due to a bug in the .net core 2.1 framework.
-/// Throwing an exception or using Environment.Exit(...) leads to a deadlock
-/// while shutting the application down.
-/// </summary>
-let updateConfigFromLocalFile =
-    if System.IO.File.Exists("config.json") then 
-        let config = System.IO.File.ReadAllText("config.json")
-                     |> JsonConvert.DeserializeObject<Configuration.Configuration>
-        do Configuration.Configuration.Instance <- config
-        true
-    else
-        false
-
 /// <summar>
 /// Prints a highlighted error message and then returns an error exit code.
 /// Flushes the console output stream to make sure the colors are reset properly.
@@ -91,23 +108,28 @@ let exitWithError error =
     do Console.Out.Flush ()
     -1
 
+/// <summary>
+/// Creates the webserver.
+/// </summary>
+let buildKestrel () =
+    WebHostBuilder()
+     .UseKestrel()
+     .UseIISIntegration()
+     .UseWebRoot(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"))
+     .Configure(Action<IApplicationBuilder> configureApp)
+     .ConfigureServices(configureServices)
+     .ConfigureLogging(configureLogging)
+     .Build()
+
 [<EntryPoint>]
 let main _ =
-    let host = WebHostBuilder()
-                .UseKestrel()
-                .UseIISIntegration()
-                .UseWebRoot(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"))
-                .Configure(Action<IApplicationBuilder> configureApp)
-                .ConfigureServices(configureServices)
-                .ConfigureLogging(configureLogging)
-                .Build()
-                
     if updateConfigFromLocalFile then 
         if Configuration.Configuration.Instance.BasePath |> System.IO.Directory.Exists then
             do printfn "Contents of download folder (%s):" Configuration.Configuration.Instance.BasePath
             do System.IO.Directory.GetFiles(Configuration.Configuration.Instance.BasePath)
                |> Array.iter (fun file -> printfn "%s" file)
             
+            let host = buildKestrel ()       
             do host.Run ()
             0
         else 
