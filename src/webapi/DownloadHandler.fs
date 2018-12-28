@@ -11,14 +11,10 @@ open Giraffe
 open WebApi
 
 /// <summary>
-/// Creates a 404 response for the given context.
-/// </summary>
-let create404 (ctx: HttpContext) (next: HttpFunc) responseText =
-    ctx.Response.StatusCode <- 404
-    Views.badRequestView responseText |> htmlView
-
-let failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (statusCode: int) (message: string) =
-    do ctx.SetStatusCode(500)
+/// Sets the error status code and the error message in the given context.
+/// </Summary>
+let private failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (statusCode: int) (message: string) =
+    do ctx.SetStatusCode(statusCode)
     do ctx.Items.Add("errormessage", message)
     next ctx
 
@@ -39,7 +35,7 @@ let private getFileStreamResponseAsync file downloadname (ctx: HttpContext) (nex
                 None
                 None
         | None ->
-            return! (create404 ctx next "Download stream not set. Please contact the administrator.") next ctx
+            return! (failWithStatusCodeAndMessage ctx next 500 "Download stream not set. Please contact the administrator.")
     }
         
 /// <summary>
@@ -49,7 +45,7 @@ let private getFileStreamResponseAsync file downloadname (ctx: HttpContext) (nex
 /// <remarks>
 /// This is useful because the filename might contains a relative path oder a folder name.
 /// </summary>        
-let createCompletePathAndFilename basePath filename =
+let private createCompletePathAndFilename basePath filename =
     let fullpath = IO.Path.Combine(basePath, filename)
     let basePath = IO.Path.GetDirectoryName(fullpath)
     let filename = IO.Path.GetFileName(fullpath);
@@ -78,6 +74,9 @@ let requiresQueryParameters (parameters: string seq) (addToContex: bool) : HttpH
                 return! next ctx
         }
 
+/// <summary>
+/// Checks if the context contains a filename item and if that filename points to an existing file.
+/// </summary>
 let requiresExistanceOfFileInContext (basePath: string) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
@@ -94,6 +93,9 @@ let requiresExistanceOfFileInContext (basePath: string) : HttpHandler =
                 return None
         }
         
+/// <summary>
+/// Searches for a given file, checks for valid tokens and returns a FileStream.
+/// </summary>        
 let getDownloadFilestream (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeTime: TimeSpan) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
