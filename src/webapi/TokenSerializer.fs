@@ -19,9 +19,18 @@ type TokenValueContent =
 /// $VALUE:$EXPIRATIONDATE
 /// </summary>
 let serializeTokenValue (tokenvalue: TokenValue): string =
-    match tokenvalue.ExpirationDate with 
-    | Some date -> sprintf "%s:%s" tokenvalue.Value <| date.ToString("yyyy-MM-dd")
-    | None      -> tokenvalue.Value
+    let noneStringAsEmpty (s: string option) =
+        match s with 
+        | Some content -> content
+        | None -> ""
+        
+    let noneDateAsEmpty (d: DateTime option) =
+        match d with 
+        | Some date -> date.ToString("yyyy-MM-dd")
+        | None      -> ""
+
+    sprintf "%s:%s #%s" (tokenvalue.Value) (tokenvalue.ExpirationDate |> noneDateAsEmpty) (tokenvalue.Comment |> noneStringAsEmpty)
+    |> (fun (input: string) -> input.Replace(":::", ":").Replace("::", ":").TrimEnd(':').TrimEnd('#').TrimEnd(' '))
 
 /// <summary>
 /// Serializes a Token by serializing each TokenValue using the serializeTokenValue method.
@@ -44,10 +53,13 @@ let serializeTokenOption (token: Token option) =
 /// (See serializeTokenValue for format details.)
 /// </summary>    
 let deserializeTokenValue (content: string) : Result<TokenValue, string> =    
+    let content = content.Replace("#", ":").Replace(" ", "")
+    
     match content.Split(":") with 
-    | [| value ; expiration |] -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)) }    
-    | [| value |]              -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = None }
-    | _                        -> Error "String split delivered zero or more than two parts."
+    | [| value ; expiration; comment |] -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = Some comment }
+    | [| value ; expiration |]          -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = None }    
+    | [| value |]                       -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = None; TokenValue.Comment = None }
+    | _                                 -> Error "String split delivered zero or more than two parts."
     
 /// <summary>
 /// Deserializes a Token by deserializing each line using deserializeTokenValue.

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Seq.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="Tokens.fs" />

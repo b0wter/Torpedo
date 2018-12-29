@@ -56,7 +56,27 @@ let addIfNotExisting (items: IDictionary<obj, obj>) (key: string) (value: string
         items
     | false ->
         items.Add(key, value)
-        items                            
+        items
+        
+/// <summary>
+/// Takes an input, splits it at the first element for which the given predicate holds true.
+/// If includeInLeft is true, the first element for which the predicate is true is included in the first tuple item.
+/// </summary>
+let splitAtPredicate<'a, 'b, 'c> (splitToElements: 'a -> 'b seq) (aggregate: 'b seq -> 'c) (predicate: 'b -> bool) (includeInFirst: bool) (items: 'a) : ('c * 'c) =
+    let splits = items |> splitToElements
+    let splitIndex = splits |> Seq.tryFindIndex predicate
+    let splitIndex = match splitIndex with 
+                     | Some index -> index
+                     | None -> splits |> Seq.length
+    
+    let splitIndex = if includeInFirst then splitIndex + 1 else splitIndex
+    (
+        splits |> Seq.take splitIndex |> aggregate, 
+        splits |> Seq.skipOrEmpty<'b> (splitIndex + 1) |> aggregate
+    )
+
+let splitAtPredicateId (predicate: 'a -> bool) (includeLeft: bool) (items: 'a seq) : ('a seq * 'a seq) =
+    splitAtPredicate id id predicate includeLeft items
                             
 [<Extension>]
 type System.String with

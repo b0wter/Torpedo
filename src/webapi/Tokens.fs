@@ -9,6 +9,7 @@ type TokenValue =
     {
         Value: string;
         ExpirationDate: DateTime option;
+        Comment: string option;
     }
     
 /// <summary>
