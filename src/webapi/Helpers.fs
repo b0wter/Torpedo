@@ -38,7 +38,7 @@ let filterOks (items: Result<'a, 'b> seq) : 'a seq =
 /// Adds or appends a string with a given key to the given dictionary.
 /// In case the key exists the string is appended else it is added.
 /// </summary>
-let appendTo (items: IDictionary<obj, obj>) (key: string) (value: string) =
+let appendTo (items: IDictionary<obj, obj>) (key: string) (value: string) : IDictionary<obj, obj> =
     match items.ContainsKey(key) with 
     | true ->
         items.[key] <- items.[key].ToString() + value

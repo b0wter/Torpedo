@@ -1,0 +1,66 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "/home/b0wter/work/torpedo/tests/webapi/WebApiTests.fsproj",
+    "projectName": "WebApiTests",
+    "projectPath": "/home/b0wter/work/torpedo/tests/webapi/WebApiTests.fsproj",
+    "outputPath": "/home/b0wter/work/torpedo/tests/webapi/obj/",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "/usr/share/dotnet/sdk/NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {
+          "/home/b0wter/work/torpedo/src/webapi/WebApi.fsproj": {
+            "projectPath": "/home/b0wter/work/torpedo/src/webapi/WebApi.fsproj"
+          }
+        }
+      }
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "FSharp.Core": {
+          "target": "Package",
+          "version": "[4.5.2, )"
+        },
+        "FsUnit": {
+          "target": "Package",
+          "version": "[3.4.0, )"
+        },
+        "FsUnit.xUnit": {
+          "target": "Package",
+          "version": "[3.4.0, )"
+        },
+        "Microsoft.NET.Test.Sdk": {
+          "target": "Package",
+          "version": "[15.9.0, )"
+        },
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        },
+        "xunit": {
+          "target": "Package",
+          "version": "[2.4.1, )"
+        },
+        "xunit.runner.visualstudio": {
+          "target": "Package",
+          "version": "[2.4.1, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}

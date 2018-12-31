@@ -19,18 +19,17 @@ type TokenValueContent =
 /// $VALUE:$EXPIRATIONDATE
 /// </summary>
 let serializeTokenValue (tokenvalue: TokenValue): string =
-    let noneStringAsEmpty (s: string option) =
+    let noneStringAsEmpty (prefix: string) (suffix: string) (s: string option) =
         match s with 
-        | Some content -> content
+        | Some content -> sprintf "%s%s%s" prefix content suffix
         | None -> ""
         
-    let noneDateAsEmpty (d: DateTime option) =
+    let noneDateAsEmpty (prefix: string) (suffix: string) (d: DateTime option) =
         match d with 
-        | Some date -> date.ToString("yyyy-MM-dd")
+        | Some date -> sprintf "%s%s%s" prefix (date.ToString("yyyy-MM-dd")) suffix
         | None      -> ""
 
-    sprintf "%s:%s #%s" (tokenvalue.Value) (tokenvalue.ExpirationDate |> noneDateAsEmpty) (tokenvalue.Comment |> noneStringAsEmpty)
-    |> (fun (input: string) -> input.Replace(":::", ":").Replace("::", ":").TrimEnd(':').TrimEnd('#').TrimEnd(' '))
+    sprintf "%s%s%s" (tokenvalue.Value) (tokenvalue.ExpirationDate |> noneDateAsEmpty ":" "") (tokenvalue.Comment |> noneStringAsEmpty " # " "")
 
 /// <summary>
 /// Serializes a Token by serializing each TokenValue using the serializeTokenValue method.
@@ -48,22 +47,27 @@ let serializeTokenOption (token: Token option) =
     | Some string -> Some (serializeToken string)
     | None        -> None
     
+let private trimTokenValue (token: string) =
+    token
+     .TrimStart(' ', '\t')
+     .TrimEnd(' ', '\t')
+    
 /// <summary>
 /// Deserializes a TokenValue.
 /// (See serializeTokenValue for format details.)
 /// </summary>    
 let deserializeTokenValue (content: string) : Result<TokenValue, string> =    
-    let content = content.Replace("#", ":").Replace(" ", "")
+    let content = content.Replace("#", ":")
     
     match content.Split(":") with 
-    | [| value ; expiration; comment |] -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = Some comment }
-    | [| value ; expiration |]          -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = None }    
-    | [| value |]                       -> Ok { TokenValue.Value = value; TokenValue.ExpirationDate = None; TokenValue.Comment = None }
+    | [| value ; expiration; comment |] -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = Some (comment.TrimStart(' ', '\t')) }
+    | [| value ; expiration |]          -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = None }    
+    | [| value |]                       -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = None; TokenValue.Comment = None }
     | _                                 -> Error "String split delivered zero or more than two parts."
     
 /// <summary>
 /// Deserializes a Token by deserializing each line using deserializeTokenValue.
-/// </summary>    
+/// </summary>
 let deserializeToken (filename: string) (content: TokenValueContent) : Result<Token, string> =
     let lines = match content with 
                 | AsLines l -> l

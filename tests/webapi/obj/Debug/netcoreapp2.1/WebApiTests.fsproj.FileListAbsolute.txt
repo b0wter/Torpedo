@@ -1,0 +1,17 @@
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/web.config
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/xunit.runner.reporters.netcoreapp10.dll
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/xunit.runner.utility.netcoreapp10.dll
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/WebApiTests.deps.json
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/WebApiTests.runtimeconfig.json
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/WebApiTests.runtimeconfig.dev.json
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/WebApiTests.dll
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/WebApiTests.pdb
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/torpedo.dll
+/home/b0wter/work/torpedo/tests/webapi/bin/Debug/netcoreapp2.1/torpedo.pdb
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.fsprojAssemblyReference.cache
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.AssemblyInfoInputs.cache
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.AssemblyInfo.fs
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.fsproj.CopyComplete
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.dll
+/home/b0wter/work/torpedo/tests/webapi/obj/Debug/netcoreapp2.1/WebApiTests.pdb

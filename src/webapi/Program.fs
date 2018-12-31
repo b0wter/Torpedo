@@ -17,6 +17,9 @@ open Torpedo
 open WebApi
 open WebApi.DownloadHandler
 open WebApi.HttpHandlers
+open Hangfire
+open Hangfire
+open Hangfire.MemoryStorage
 
 // ---------------------------------
 // Web app
@@ -59,7 +62,7 @@ let webApp =
         
         route "/" >=> (Views.indexView |> htmlView)
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
-        
+
 // ---------------------------------
 // Error handler
 // ---------------------------------
@@ -67,6 +70,11 @@ let webApp =
 let errorHandler (ex : Exception) (logger : ILogger) =
     logger.LogError(ex, "An unhandled exception has occurred while executing the request.")
     clearResponse >=> setStatusCode 500 >=> text ex.Message
+
+// ---------------------------------
+// Crons
+// ---------------------------------
+
 
 // ---------------------------------
 // Config and Main
@@ -85,10 +93,16 @@ let configureApp (app : IApplicationBuilder) =
     | false -> app.UseGiraffeErrorHandler errorHandler)
         .UseHttpsRedirection()
         .UseStaticFiles()
+        .UseHangfireServer()
         .UseCors(configureCors)
         .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
+    services.AddHangfire(
+        fun c -> 
+            c.UseMemoryStorage() |> ignore
+            do RecurringJob.AddOrUpdate((fun () -> do printfn "cron"), Cron.Minutely)
+        ) |> ignore
     services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
 
