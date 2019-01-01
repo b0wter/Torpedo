@@ -4,6 +4,8 @@ module WebApiTests.HelperTests
     open FsUnit.Xunit
     open System.Collections.Generic
     open WebApiTests
+    open FsUnit
+    open System
     
     type ``containsNone`` ()=
         [<Fact>] member x.
@@ -80,3 +82,27 @@ module WebApiTests.HelperTests
                 let value = (WebApi.Helpers.addIfNotExisting dict "key" "appended").["key"].ToString() in
                     value |> should equal "appended"
                 
+    type ``splitAtPredicate`` ()=
+        [<Fact>] member x.
+         ``True predicate splits the list`` ()=
+            let items = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10 ] |> Seq.ofList in
+                let predicate = (fun i -> i = 5) in
+                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
+                        let test = (fun () ->
+                            do left |> List.ofSeq |> should haveLength 5
+                            do left |> should contain 5
+                            do right |> List.ofSeq |> should haveLength 5
+                            do right |> should contain 6
+                        ) in 
+                            test ()
+                    
+        [<Fact>] member x.
+         ``Always false Predicate returns full seq`` ()=
+            let items = [ 1; 2; 3; 4; 6; 7; 8; 9; 10 ] |> Seq.ofList in
+                let predicate = (fun _ -> false) in
+                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
+                        let test = (fun () ->
+                            do left |> List.ofSeq |> should haveLength 9
+                        ) in 
+                            test ()
+                    

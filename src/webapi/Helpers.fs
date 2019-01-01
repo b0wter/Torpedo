@@ -71,8 +71,8 @@ let splitAtPredicate<'a, 'b, 'c> (splitToElements: 'a -> 'b seq) (aggregate: 'b 
     
     let splitIndex = if includeInFirst then splitIndex + 1 else splitIndex
     (
-        splits |> Seq.take splitIndex |> aggregate, 
-        splits |> Seq.skipOrEmpty<'b> (splitIndex + 1) |> aggregate
+        splits |> Seq.takeMax splitIndex |> aggregate, 
+        splits |> Seq.skipOrEmpty<'b> splitIndex |> aggregate
     )
 
 let splitAtPredicateId (predicate: 'a -> bool) (includeLeft: bool) (items: 'a seq) : ('a seq * 'a seq) =
