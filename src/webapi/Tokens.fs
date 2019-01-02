@@ -48,5 +48,5 @@ let setExpirationTimeSpan (span: TimeSpan) =
 /// <summary>
 /// Checks if a Token contains a TokenValue with the given value.
 /// </summary>
-let tokenContainsValue (token: Token) (value: string) =
+let tokenContainsValue (value: string) (token: Token) =
     token.Values |> Seq.exists (fun element -> element.Value = value)                                        
