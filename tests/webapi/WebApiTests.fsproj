@@ -9,7 +9,9 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <Compile Include="HelperTests.fs" />
+    <Compile Include="SeqTests.fs" />
     <Compile Include="TokenSerializerTests.fs" />
+    <Compile Include="TokenTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

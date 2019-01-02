@@ -84,15 +84,24 @@ module WebApiTests.HelperTests
                 
     type ``splitAtPredicate`` ()=
         [<Fact>] member x.
-         ``True predicate splits the list`` ()=
+         ``True predicate splits the list (includeInFirst = true)`` ()=
             let items = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10 ] |> Seq.ofList in
                 let predicate = (fun i -> i = 5) in
                     let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
                         let test = (fun () ->
-                            do left |> List.ofSeq |> should haveLength 5
-                            do left |> should contain 5
-                            do right |> List.ofSeq |> should haveLength 5
-                            do right |> should contain 6
+                            do [ 1; 2; 3; 4; 5 ] |> List.iter (fun i -> left |> should contain i)
+                            do [ 6; 7; 8; 9; 10 ] |> List.iter (fun i -> right |> should contain i)
+                        ) in 
+                            test ()
+                    
+        [<Fact>] member x.
+         ``True predicate splits the list (includeInFirst = false)`` ()=
+            let items = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10 ] |> Seq.ofList in
+                let predicate = (fun i -> i = 5) in
+                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate false) in
+                        let test = (fun () ->
+                            do [ 1; 2; 3; 4; ] |> List.iter (fun i -> left |> should contain i)
+                            do [ 5; 6; 7; 8; 9; 10 ] |> List.iter (fun i -> right |> should contain i)
                         ) in 
                             test ()
                     
