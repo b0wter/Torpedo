@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FileAccessTests.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="HelperTests.fs" />
     <Compile Include="SeqTests.fs" />

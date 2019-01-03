@@ -69,14 +69,14 @@ let getFileDates (filenames: string seq) =
 /// Checks if the given file is downloadable meaning a matching Token file exists
 /// and the Token is uniquely bound to a single content file.
 /// </summary>
-let customExistsIn (pathCombinator: (string * string) -> string) (folder: string) (filename: string): bool =
+let customExistsIn (getFilesWithTokens: string -> DownloadPair []) (pathCombinator: (string * string) -> string) (folder: string) (filename: string): bool =
     if folder.Contains("..") || filename.Contains("..") then 
         false 
     else
-        getFilesWithTokens folder |> Array.map snd |> Array.contains (Path.Combine(folder, filename))
+        getFilesWithTokens folder |> Array.map snd |> Array.contains (pathCombinator(folder, filename))
     
 let existsIn =
-    customExistsIn Path.Combine
+    customExistsIn (getFilesWithTokens) Path.Combine
     
 /// <summary>
 /// Interprets the filename as a combination of directory and filename and checks if it exists.
