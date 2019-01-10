@@ -82,6 +82,6 @@ let deserializeToken (tokenFilename: string) (contentFilename: string) (content:
                                            | Error err -> Error err)
     
     if parsed |> Helpers.containsError then
-        Error "Could not deserialize the token."                                                       
+        Error ("Could not deserialize the token: " + tokenFilename + ".")
     else 
         Ok ({ Values = parsed |> Helpers.filterOks; TokenFilename = tokenFilename; ContentFilename = contentFilename })

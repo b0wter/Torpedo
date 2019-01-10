@@ -38,6 +38,16 @@ let filterOks (items: Result<'a, 'b> seq) : 'a seq =
     |> Seq.choose id                            
                             
 /// <summary>
+/// Filters a collection of Result<...,...> and returns only Error values.
+/// </summary>  
+let filterErrors (items: Result<'a, 'b> seq) : 'b seq =
+    items
+    |> Seq.map (fun item -> match item with 
+                            | Ok _    -> None
+                            | Error e -> Some e)
+    |> Seq.choose id                            
+                           
+/// <summary>
 /// Adds or appends a string with a given key to the given dictionary.
 /// In case the key exists the string is appended else it is added.
 /// </summary>

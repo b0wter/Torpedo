@@ -45,8 +45,8 @@ let updateConfigFromLocalFile =
 let downloadFile =
     downloadWorkflow 
         Configuration.Configuration.Instance.BasePath
-        Configuration.Configuration.Instance.DefaultDownloadLifeTime
-        Configuration.Configuration.Instance.DefaultTokenLifeTime
+        Configuration.Configuration.Instance.DownloadLifeTime
+        Configuration.Configuration.Instance.TokenLifeTime
         
 let requiresExistanceOfFile =
     requiresExistanceOfFileInContext
@@ -75,7 +75,10 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // Crons
 // ---------------------------------
 
-
+let cleanOldDownloads () =
+    Cleanup.cleanAll Configuration.Configuration.Instance.BasePath
+                     Configuration.Configuration.Instance.TokenLifeTime
+                     Configuration.Configuration.Instance.DownloadLifeTime
 // ---------------------------------
 // Config and Main
 // ---------------------------------
@@ -101,7 +104,7 @@ let configureServices (services : IServiceCollection) =
     services.AddHangfire(
         fun c -> 
             c.UseMemoryStorage() |> ignore
-            do RecurringJob.AddOrUpdate((fun () -> do printfn "cron"), Cron.Minutely)
+            do RecurringJob.AddOrUpdate((fun () -> do cleanOldDownloads ()), Cron.HourInterval Configuration.Configuration.Instance.CronIntervalInHours)
         ) |> ignore
     services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
@@ -139,10 +142,6 @@ let buildKestrel () =
 let main _ =
     if updateConfigFromLocalFile then 
         if Configuration.Configuration.Instance.BasePath |> System.IO.Directory.Exists then
-            do printfn "Contents of download folder (%s):" Configuration.Configuration.Instance.BasePath
-            do System.IO.Directory.GetFiles(Configuration.Configuration.Instance.BasePath)
-               |> Array.iter (fun file -> printfn "%s" file)
-            
             let host = buildKestrel ()       
             do host.Run ()
             0

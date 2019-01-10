@@ -20,12 +20,12 @@ type Path = string
 /// Only considers those Token files which have exactly one corresponding content file.
 /// (e.g.: cook.png cook.bmp & cook.token would NOT be returned but shark.png & shark.token would be)
 /// </summary>
-let customGetFilesWithTokens (getFilesInFolder: string -> string [])
-                             (getFileNameWithoutExtension: string -> string) 
-                             (getFileName: string -> string) 
-                             (getFileExtension: string -> string) 
-                             (pathCombinator: (string * string) -> string)
-                             (folder: FileName)
+let customGetFilesWithTokens (getFilesInFolder: FolderName -> FileName [])
+                             (getFileNameWithoutExtension: FileName -> string) 
+                             (getFileName: FileName -> string) 
+                             (getFileExtension: FileName -> string) 
+                             (pathCombinator: (Path * Path) -> Path)
+                             (folder: FolderName)
                                  : DownloadPair[] =
     getFilesInFolder(folder)
     |> Array.map getFileName

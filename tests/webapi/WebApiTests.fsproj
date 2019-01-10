@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CleanupTests.fs" />
     <Compile Include="FileAccessTests.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="HelperTests.fs" />

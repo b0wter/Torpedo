@@ -8,3 +8,7 @@ module Seq
     let takeMax<'a> (count: int) (items: 'a seq) : 'a seq =
         let amountToTake = System.Math.Min(count, items |> Seq.length)
         items |> Seq.take amountToTake
+        
+    let all<'a> (predicate: 'a -> bool) (items: 'a seq) : bool =
+        items |> Seq.exists (fun a -> a |> predicate = false)
+        |> not

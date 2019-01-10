@@ -1,5 +1,7 @@
 {
 	"BasePath": "/app/content/",
-	"DefaultDownloadLifetime": "6.00:00:00",
-	"DefaultTokenLifetime": "3.00:00:00"
+	"DownloadLifetime": "6.00:00:00",
+	"TokenLifetime": "3.00:00:00",
+	"CleanExpiredDownloads": true,
+	"CronIntervalInHours": 24
 }

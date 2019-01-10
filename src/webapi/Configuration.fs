@@ -11,8 +11,10 @@ type Configuration() =
         [<JsonIgnore>]
         static let mutable instance = Configuration ()
         let mutable basePath: string = ""
-        let mutable defaultDownloadLifeTime: TimeSpan = TimeSpan.FromDays(7.0)
-        let mutable defaultTokenLifeTime: TimeSpan = TimeSpan.FromDays(2.0)
+        let mutable downloadLifeTime: TimeSpan = TimeSpan.FromDays(7.0)
+        let mutable tokenLifeTime: TimeSpan = TimeSpan.FromDays(2.0)
+        let mutable cleanExpiredDownloads: bool = false
+        let mutable cronIntervalInHours: int = 24
         
         /// <summary>
         /// Use this Singleton to access the configuration from anywhere.
@@ -33,13 +35,27 @@ type Configuration() =
         /// Lifetime of a download. The check is done against the current time and the last time
         /// the token file was modified.
         /// </summary>
-        member this.DefaultDownloadLifeTime
-            with get() = defaultDownloadLifeTime
-            and  set(value) = defaultDownloadLifeTime <- value
+        member this.DownloadLifeTime
+            with get() = downloadLifeTime
+            and  set(value) = downloadLifeTime <- value
             
         /// <summary>
         /// Lifetime of a download once the first download attempt has been started.
         /// </summary>
-        member this.DefaultTokenLifeTime
-            with get() = defaultTokenLifeTime
-            and  set(value) = defaultTokenLifeTime <- value
+        member this.TokenLifeTime
+            with get() = tokenLifeTime
+            and  set(value) = tokenLifeTime <- value
+
+        /// <summary>
+        /// Gets/sets wether the expired downloads are periodically deleted.
+        /// </summary>
+        member this.CleanExpiredDownloads
+            with get() = cleanExpiredDownloads
+            and set(value) = cleanExpiredDownloads <- value
+            
+        /// <summary>
+        /// Interval in which the downloads are cleared. Given in hours.
+        /// </summary>
+        member this.CronIntervalInHours
+            with get() = cronIntervalInHours
+            and set(value) = cronIntervalInHours <- value

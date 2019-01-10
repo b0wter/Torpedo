@@ -1,5 +1,7 @@
 {
 	"BasePath": "/home/b0wter/tmp/torpedo",
-	"DefaultDownloadLifetime": "6.00:00:00",
-	"DefaultTokenLifetime": "3.00:00:00"
+	"DownloadLifetime": "6.00:00:00",
+	"TokenLifetime": "3.00:00:00",
+	"CleanExpiredDownloads": false,
+	"CronIntervalInHours": 24
 }
