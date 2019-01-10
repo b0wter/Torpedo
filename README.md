@@ -8,7 +8,7 @@ The links will expire automatically based on either of two conditions:
 * If the download is older than X days.
 * If the token (see below) has expired.
 
-The project is fully usable except for the automatic removal of old downloads.
+The project is in a fully usable state.
 
 ![Screenshot](https://user-images.githubusercontent.com/614261/50368705-148f3280-058c-11e9-9482-2bb5810b88c0.png)
 
@@ -28,7 +28,11 @@ abcdef
 12345678:2019-01-01
 ```
 
-The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token.
+The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token. You can add comments to the tokens:
+
+```
+abcdef # This is a comment.
+```
 
 Download likes look like this:
 
@@ -40,19 +44,29 @@ Where `cook.png` is a route paramter for the file to download and `abcdef` is th
 
 Last modified file timestamps are used to check if a download is too old to be served. Torpedo uses the token file as reference not the content file.
 
+Why two lifetimes?
+-----------------
+Torpedo uses two different lifetimes for the following reasons: There are cases where you want to share a file with multiple people and have no idea when they will start downloading. Thus you need a long lifetime for the download itself. However, you also want to keep the file on the net as short as possible. Thats why the tokens themselves also expire. People will not have a lot of time to share "their" link with other people.
+
 Configuration
 =============
 The application needs a configuration file to work properly. The file is written in json and looks like this:
 ```
 {
 	"BasePath": "/home/b0wter/tmp/torpedo",
-	"DefaultDownloadLifetime": "7.00:00:00",
-	"DefaultTokenLifetime": "2.00:00:00"
+	"DownloadLifetime": "7.00:00:00",
+	"TokenLifetime": "2.00:00:00",
+	"CleanExpiredDownloads": false,
+	"CronIntervalInHours": 24
 }
 
 ```
-The lifetimes are given in the format: `$Days.$Hours:$Minutes:$Seconds`.
-The `BasePath` is the path to the files where you store your downloads. Please make sure that the user running this app has read/write access (write access is needed to periodically delete old downloads).
+
+* *BasePath*: needs to point to the directory you want to use to serve files.
+* *DownloadLifetime*: Expiration time of a download. This is counted from the moment you create the token file (using the last written timestamp). Given in the format $DAYS:HOURS:MINUTES:SECONDS.
+* *TokenLifetime*: Expiration time of a single token value. This is set the moment the first user uses this token. Given in the format $DAYS:HOURS:MINUTES:SECONDS.
+* *CleanExpiredDownloads*: Makes Torpedo periodically check all downloads and delete the token and content files for expired downloads.
+* *CronIntervalInHours*: Interval in which the aforementioned action is performed. Given in hours.
 
 Docker
 ======
