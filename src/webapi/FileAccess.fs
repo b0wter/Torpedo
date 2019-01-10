@@ -2,7 +2,9 @@ module WebApi.FileAccess
 open System
 open System.IO
 
-type DownloadPair = (string * string)
+type ContentFilename = string
+type TokenFilename = string
+type DownloadPair = (TokenFilename * ContentFilename)
 
 /// <summary>
 /// File extension for tokens.
@@ -73,7 +75,8 @@ let customExistsIn (getFilesWithTokens: string -> DownloadPair []) (pathCombinat
     if folder.Contains("..") || filename.Contains("..") then 
         false 
     else
-        getFilesWithTokens folder |> Array.map snd |> Array.contains (pathCombinator(folder, filename))
+        let t = getFilesWithTokens folder
+        t |> Array.map snd |> Array.contains (pathCombinator(folder, filename))
     
 let existsIn =
     customExistsIn (getFilesWithTokens) Path.Combine
@@ -95,7 +98,8 @@ let fileExists =
 /// Tries to open a file stream for the given file. 
 /// Returns Some FileStream if successful otherwise None.
 /// </summary>
-let fileStream (filename: string): FileStream option =
+let fileStream (folder: string) (filename: string): FileStream option =
+    let filename = Path.Combine(folder, filename)
     let path = Path.GetDirectoryName(filename)
     
     if String.IsNullOrWhiteSpace(path) then 
@@ -111,8 +115,13 @@ let fileStream (filename: string): FileStream option =
 /// <summary>
 /// Writes the given content into the given file using the default character encoding.
 /// </summary>
-let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: string) (content: string) =
-    persistor(filename, content)
+let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: string) (content: string) : bool =
+    try
+        persistor(filename, content)
+        true
+    with
+    | ex ->
+        false
     
 let persistStringAsFile =
     customPersistStringAsFile File.WriteAllText 

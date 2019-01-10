@@ -8,7 +8,7 @@ module WebApiTests.TokenSerializerTests
     open WebApi.Tokens
     
     let private deserializeTokenTest (lengthAssert: int -> unit) (valueAssert: string -> unit) (dateAssert: DateTime option -> unit) (commentAssert: string option -> unit) (content: string) =
-        let token = WebApi.TokenSerializer.deserializeToken "dummy.filename" (AsTotal content)
+        let token = WebApi.TokenSerializer.deserializeToken "dummy.filename" "dummy.content" (AsTotal content)
         
         match token with 
         | Error _  -> failwith "Token could not be deserialized."
@@ -80,7 +80,8 @@ module WebApiTests.TokenSerializerTests
                         TokenValue.Comment = Some "This is a comment."
                     }
                 ] |> Seq.ofList
-                Token.Filename = "filename"
+                Token.TokenFilename = "filename"
+                Token.ContentFilename = "content"
             }
         
         TokenSerializer.serializeToken token
@@ -96,7 +97,8 @@ module WebApiTests.TokenSerializerTests
                         TokenValue.Comment = None
                     }
                 ] |> Seq.ofList
-                Token.Filename = "filename"
+                Token.TokenFilename = "filename"
+                Token.ContentFilename = "content"
             }
         
         TokenSerializer.serializeToken token
@@ -112,7 +114,8 @@ module WebApiTests.TokenSerializerTests
                         TokenValue.Comment = None
                     }
                 ] |> Seq.ofList
-                Token.Filename = "filename"
+                Token.TokenFilename = "filename"
+                Token.ContentFilename = "content"
             }
         
         TokenSerializer.serializeToken token

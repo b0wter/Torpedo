@@ -70,10 +70,11 @@ let ``customGetFilesWithTokens with empty file list returns empty array`` () =
 [<InlineData("test.file", "test.token", "../dummy_folder", "test.file", false)>]
 [<InlineData("test.file", "test.token", "dummy_folder", "../test.file", false)>]
 [<InlineData("test.file", "test.token", "dummy_folder", "test.file", true)>]
+[<InlineData("test.file", "test.token", "", "test.file", true)>]
 let ``existsIn with different valid and invalid file/folder names returns expected result`` localFile localToken basePath requestedFile expected =
     let combinator filename = IO.Path.Combine(basePath, filename)
     
-    WebApi.FileAccess.customExistsIn (fun _ -> [| (localFile |> combinator, localToken |> combinator) |])
+    WebApi.FileAccess.customExistsIn (fun _ -> [| (localToken |> combinator , localFile |> combinator ) |])
                                      (Path.Combine)
                                      basePath
                                      requestedFile

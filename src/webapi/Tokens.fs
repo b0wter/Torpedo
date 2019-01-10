@@ -18,8 +18,17 @@ type TokenValue =
 /// </summary>    
 type Token = 
     {
+        /// <summary>
+        /// Collection of token values.
+        /// </summary>
         Values: TokenValue seq;
-        Filename: string;
+        /// <summary>
+        /// Filename for this token. Is required for easier serialization.
+        /// </summary>
+        TokenFilename: string;
+        /// <summary>
+        /// Filename of the content this token is meant for.
+        ContentFilename: string;
     }
     
 /// <summary>

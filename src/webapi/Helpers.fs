@@ -3,6 +3,11 @@ open System.Collections.Generic
 open System.Linq
 open System.Runtime.CompilerServices
 
+type PathName =
+    | FolderName of string
+    | FileName of string
+    | Path of string
+
 /// <summary>
 /// Maps items of a collection and runs a filter afterwards. The original item is returned for all mapped items that passed the filter.
 /// </summary>
@@ -77,6 +82,12 @@ let splitAtPredicate<'a, 'b, 'c> (splitToElements: 'a -> 'b seq) (aggregate: 'b 
 
 let splitAtPredicateId (predicate: 'a -> bool) (includeLeft: bool) (items: 'a seq) : ('a seq * 'a seq) =
     splitAtPredicate id id predicate includeLeft items
+                            
+let bind switchFunction =
+    fun input ->
+        match input with
+        | Ok s -> switchFunction s
+        | Error f -> Error f
                             
 [<Extension>]
 type System.String with

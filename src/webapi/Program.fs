@@ -43,7 +43,7 @@ let updateConfigFromLocalFile =
         false
         
 let downloadFile =
-    getDownloadFilestream 
+    downloadWorkflow 
         Configuration.Configuration.Instance.BasePath
         Configuration.Configuration.Instance.DefaultDownloadLifeTime
         Configuration.Configuration.Instance.DefaultTokenLifeTime

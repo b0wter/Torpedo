@@ -5,7 +5,7 @@ open FsUnit.Xunit
 open System
 open WebApi.Tokens
 
-let private createTokenWithSingleValue value comment expiration filename =
+let private createTokenWithSingleValue value comment expiration tokenFilename contentFilename =
     {
         Token.Values = [
             {
@@ -14,24 +14,26 @@ let private createTokenWithSingleValue value comment expiration filename =
                 TokenValue.ExpirationDate = expiration;
             }
         ];
-        Token.Filename = filename
+        Token.TokenFilename = tokenFilename
+        Token.ContentFilename = contentFilename
     }
     
-let private createTokenWithMultipleValues values filename =
+let private createTokenWithMultipleValues values tokenFilename contentFilename =
     {
         Token.Values = values |> List.map (fun (value, expiration, comment) -> { Value = value; ExpirationDate = expiration; Comment = comment })
-        Token.Filename = filename
+        Token.TokenFilename = tokenFilename
+        Token.ContentFilename = contentFilename
     }
     
 let private createTokenWithSingleValueAndDummyFilename value expiration comment =
-    createTokenWithSingleValue value comment expiration "dummy.token"    
+    createTokenWithSingleValue value comment expiration "dummy.token" "dummy.content"
     
 let private createTokenWithMultipleValuesAndDummyFilename values =
-    createTokenWithMultipleValues values "dummy.token"
+    createTokenWithMultipleValues values "dummy.token" "dummy.content"
     
 [<Fact>]
 let ``setExpirationDate on token without expiration date sets an expiration date`` () =
-    let token = createTokenWithMultipleValues [ ("a", None, None); ("b", None, None); ("aa", None, None) ] "dummy.token"
+    let token = createTokenWithMultipleValues [ ("a", None, None); ("b", None, None); ("aa", None, None) ] "dummy.token" "dummy.content"
     let result = setExpirationDate (DateTime(2000, 1, 1)) token "a" 
     let date = (result.Values |> Seq.head).ExpirationDate
     

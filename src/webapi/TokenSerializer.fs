@@ -1,5 +1,6 @@
 module WebApi.TokenSerializer
 open System
+open System.IO
 open WebApi.Tokens
 open WebApi.Helpers
 
@@ -68,7 +69,7 @@ let deserializeTokenValue (content: string) : Result<TokenValue, string> =
 /// <summary>
 /// Deserializes a Token by deserializing each line using deserializeTokenValue.
 /// </summary>
-let deserializeToken (filename: string) (content: TokenValueContent) : Result<Token, string> =
+let deserializeToken (tokenFilename: string) (contentFilename: string) (content: TokenValueContent) : Result<Token, string> =
     let lines = match content with 
                 | AsLines l -> l
                 | AsTotal t -> t.Split(Environment.NewLine)
@@ -83,4 +84,4 @@ let deserializeToken (filename: string) (content: TokenValueContent) : Result<To
     if parsed |> Helpers.containsError then
         Error "Could not deserialize the token."                                                       
     else 
-        Ok ({ Values = parsed |> Helpers.filterOks; Filename = filename })
+        Ok ({ Values = parsed |> Helpers.filterOks; TokenFilename = tokenFilename; ContentFilename = contentFilename })

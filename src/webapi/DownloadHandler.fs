@@ -10,6 +10,22 @@ open Microsoft.Extensions.Primitives
 open Giraffe
 open WebApi
 
+type DownloadError = {
+    StatusCode: int;
+    Reason: string;
+}
+
+type WorkingState =
+    | RequiresParameterCheck of (HttpContext * HttpFunc * string seq)
+    | RequiresParametersInContext of (HttpContext * HttpFunc * string seq)
+    | RequiresDownloadPair of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename)
+    | RequiresDeserializeToken of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair)
+    | RequiresTokenValueCheck of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair * Tokens.Token * string)
+    | RequiresTokenExpiration of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair * Tokens.Token * string )
+    | Finished
+
+type DownloadResult = Result<WorkingState, DownloadError>
+
 /// <summary>
 /// Sets the error status code and the error message in the given context.
 /// </Summary>
@@ -21,9 +37,9 @@ let private failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (st
 /// <summary>
 /// Asynchronously writes a FileStream into a HTTP response.
 /// </summary>
-let private getFileStreamResponseAsync file downloadname (ctx: HttpContext) (next: HttpFunc) =
+let private getFileStreamResponseAsync folder file downloadname (ctx: HttpContext) (next: HttpFunc) =
     task {
-        let stream = FileAccess.fileStream file
+        let stream = FileAccess.fileStream folder file
         match stream with 
         | Some stream ->
             do ctx.Response.ContentType <- "application/octet-stream"
@@ -49,7 +65,7 @@ let private createCompletePathAndFilename basePath filename =
     let fullpath = IO.Path.Combine(basePath, filename)
     let basePath = IO.Path.GetDirectoryName(fullpath)
     let filename = IO.Path.GetFileName(fullpath);
-    (basePath, filename)
+    (basePath, filename, fullpath)
 
 /// <summary>
 /// Checks if the given HttpContext contains all of the given parameters als query parameters.
@@ -93,36 +109,55 @@ let requiresExistanceOfFileInContext (basePath: string) : HttpHandler =
                 return None
         }
         
-/// <summary>
-/// Searches for a given file, checks for valid tokens and returns a FileStream.
-/// </summary>        
-let getDownloadFilestream (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeTime: TimeSpan) : HttpHandler =
+        
+let (>>=) twoTrackInput switchFunction =
+    Helpers.bind switchFunction twoTrackInput
+        
+let getDownloadPair (downloadLifeTime : TimeSpan) (tokenLifeTime : TimeSpan) path filename : Result<FileAccess.DownloadPair, DownloadError> =
+    let pair = path 
+               |> FileAccess.getFilesWithTokens
+               |> Helpers.mappedFilter (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
+                                       (fun (lastmodified, _) -> (DateTime.Now - downloadLifeTime) <= lastmodified)
+               |> Seq.tryFind (fun (_, contentfile) -> IO.Path.GetFileName(contentfile) = filename)
+    match pair with
+    | Some p -> Ok p
+    | None   -> Error { StatusCode = 400; Reason = (sprintf "The download is either unknown or has expired. The default lifetime of a download is %.1f days and it will expire %.1f days after you first download attempt." downloadLifeTime.TotalDays tokenLifeTime.TotalDays) }
+    
+let deserializeToken (pair : FileAccess.DownloadPair) : Result<Tokens.Token, DownloadError> =
+    let tokenfile, contentfile = pair
+    let result = tokenfile |> FileAccess.getTextContent |> TokenSerializer.AsTotal |> (TokenSerializer.deserializeToken tokenfile contentfile)
+    match result with
+    | Ok token  -> Ok token
+    | Error msg -> Error { StatusCode = 500; Reason = "Could not read the token file. Please contact the administrator." }
+    
+let checkTokenValue (value: string) (token: Tokens.Token) : Result<Tokens.Token, DownloadError> =
+    let result = token.Values |> Seq.map (fun v -> v.Value) |> Seq.contains value
+    match result with
+    | true  -> Ok token
+    | false -> Error { StatusCode = 404; Reason = "Unknown token." }
+    
+let expireToken (tokenValue: string) (tokenLifeTime: TimeSpan) (token: Tokens.Token) : Result<Tokens.Token, DownloadError> =
+    Ok (Tokens.setExpirationTimeSpan tokenLifeTime token tokenValue)
+    
+let persistToken (token: Tokens.Token) : Result<Tokens.Token, DownloadError> =    
+    match token |> TokenSerializer.serializeToken |> FileAccess.persistStringAsFile token.TokenFilename with
+    | true  -> Ok token
+    | false -> Error { StatusCode = 500; Reason = "Could not write token file. Please contact the administrator." }
+    
+let downloadWorkflow (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeTime: TimeSpan) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let filename, tokenValue = (ctx.Items.["filename"].ToString(), ctx.Items.["token"].ToString())
-            let basePath, filename = filename |> createCompletePathAndFilename basePath
-            let downloadPair = basePath 
-                               |> FileAccess.getFilesWithTokens
-                               |> Helpers.mappedFilter (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
-                                                       (fun (lastmodified, _) -> (DateTime.Now - downloadLifeTime) <= lastmodified)
-                               |> Seq.tryFind (fun (_, contentfile) -> IO.Path.GetFileName(contentfile) = filename)
-            match downloadPair with 
-            | Some (tokenfilename, contentfilename) ->
-                let tokenResult = tokenfilename |> FileAccess.getTextContent |> TokenSerializer.AsTotal |> (TokenSerializer.deserializeToken tokenfilename)
-                match tokenResult with 
-                | Ok token ->
-                    if token.Values |> Seq.map (fun v -> v.Value) |> Seq.contains tokenValue then
-                        
-                        // persist the token with its new expiration date (new expiration date is only set if it doesnt already exist, see method for details)
-                        Tokens.setExpirationTimeSpan tokenLifeTime token tokenValue
-                        |> TokenSerializer.serializeToken
-                        |> FileAccess.persistStringAsFile token.Filename
-                        
-                        return! getFileStreamResponseAsync contentfilename filename ctx next 
-                    else 
-                        return! failWithStatusCodeAndMessage ctx next 404 "Unknown token."
-                | Error err ->
-                    return! failWithStatusCodeAndMessage ctx next 500 "Could not read token file. Please contact the system administrator."
-            | None ->
-                return! failWithStatusCodeAndMessage ctx next 400 (sprintf "The download is either unknown or has expired. The default lifetime of a download is %.1f days and it will expire %.1f days after you first download attempt." downloadLifeTime.TotalDays tokenLifeTime.TotalDays)
-        }        
+            let downloadPairFrom = (getDownloadPair downloadLifeTime tokenLifeTime)
+            let rawFilename, tokenValue = (ctx.Items.["filename"].ToString(), ctx.Items.["token"].ToString())
+            let basePath, filename, fullFilename = rawFilename |> createCompletePathAndFilename basePath
+            
+            let d = (downloadPairFrom basePath filename)
+                    >>= deserializeToken
+                    >>= (checkTokenValue tokenValue)
+                    >>= (expireToken tokenValue tokenLifeTime)
+                    >>= persistToken
+          
+            match d with
+            | Ok token -> return! (getFileStreamResponseAsync basePath filename filename ctx next)
+            | Error e  -> return! (failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason)
+        }
