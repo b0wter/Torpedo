@@ -15,17 +15,6 @@ type DownloadError = {
     Reason: string;
 }
 
-type WorkingState =
-    | RequiresParameterCheck of (HttpContext * HttpFunc * string seq)
-    | RequiresParametersInContext of (HttpContext * HttpFunc * string seq)
-    | RequiresDownloadPair of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename)
-    | RequiresDeserializeToken of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair)
-    | RequiresTokenValueCheck of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair * Tokens.Token * string)
-    | RequiresTokenExpiration of (HttpContext * HttpFunc * TimeSpan * TimeSpan * FileAccess.TokenFilename * FileAccess.DownloadPair * Tokens.Token * string )
-    | Finished
-
-type DownloadResult = Result<WorkingState, DownloadError>
-
 /// <summary>
 /// Sets the error status code and the error message in the given context.
 /// </Summary>

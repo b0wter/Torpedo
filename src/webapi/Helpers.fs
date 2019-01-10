@@ -1,7 +1,5 @@
 module WebApi.Helpers
 open System.Collections.Generic
-open System.Linq
-open System.Runtime.CompilerServices
 
 type PathName =
     | FolderName of string

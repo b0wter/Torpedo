@@ -11,6 +11,10 @@ type DownloadPair = (TokenFilename * ContentFilename)
 /// </summary>
 let tokenExtension = ".token"
 
+type FolderName = string
+type FileName = string
+type Path = string
+
 /// <summary>
 /// Returns a list of (Token filename * content filename) for all files in the given folder.
 /// Only considers those Token files which have exactly one corresponding content file.
@@ -21,7 +25,8 @@ let customGetFilesWithTokens (getFilesInFolder: string -> string [])
                              (getFileName: string -> string) 
                              (getFileExtension: string -> string) 
                              (pathCombinator: (string * string) -> string)
-                             (folder: string): DownloadPair[] =
+                             (folder: FileName)
+                                 : DownloadPair[] =
     getFilesInFolder(folder)
     |> Array.map getFileName
     |> Array.groupBy (fun name -> getFileNameWithoutExtension(name))
@@ -43,7 +48,7 @@ let getFilesWithTokens =
 /// Will throw exceptions if the file is unknown or the contents
 /// cannot be read.
 /// </summary>
-let customGetTextContent (textFileReader: string -> string) (filename: string) =
+let customGetTextContent (textFileReader: Path -> string) (filename: Path) =
     textFileReader(filename)    
     
 let getTextContent =
@@ -53,7 +58,7 @@ let getTextContent =
 /// Get the timestamp of the last mofication (local system time).
 /// Will throw an exception if the file does not exist.
 /// </summary>    
-let customGetLastModified (lastWriteTimeProvider: string -> DateTime) (filename: string) =
+let customGetLastModified (lastWriteTimeProvider: string -> DateTime) (filename: Path) =
     lastWriteTimeProvider(filename)    
         
 let getLastModified =        
@@ -63,7 +68,7 @@ let getLastModified =
 /// Retrieves the last modification dates for a list of files.
 /// Will throw an exception if any of the files does not exist.
 /// </summary>    
-let getFileDates (filenames: string seq) =
+let getFileDates (filenames: FileName seq) =
     filenames
     |> Seq.map getLastModified
     
@@ -71,12 +76,13 @@ let getFileDates (filenames: string seq) =
 /// Checks if the given file is downloadable meaning a matching Token file exists
 /// and the Token is uniquely bound to a single content file.
 /// </summary>
-let customExistsIn (getFilesWithTokens: string -> DownloadPair []) (pathCombinator: (string * string) -> string) (folder: string) (filename: string): bool =
+let customExistsIn (getFilesWithTokens: FolderName -> DownloadPair []) (pathCombinator: (string * string) -> string) (folder: FolderName) (filename: FileName): bool =
     if folder.Contains("..") || filename.Contains("..") then 
         false 
     else
-        let t = getFilesWithTokens folder
-        t |> Array.map snd |> Array.contains (pathCombinator(folder, filename))
+        getFilesWithTokens folder
+        |> Array.map snd
+        |> Array.contains (pathCombinator(folder, filename))
     
 let existsIn =
     customExistsIn (getFilesWithTokens) Path.Combine
@@ -98,7 +104,7 @@ let fileExists =
 /// Tries to open a file stream for the given file. 
 /// Returns Some FileStream if successful otherwise None.
 /// </summary>
-let fileStream (folder: string) (filename: string): FileStream option =
+let fileStream (folder: FolderName) (filename: FileName): FileStream option =
     let filename = Path.Combine(folder, filename)
     let path = Path.GetDirectoryName(filename)
     
@@ -115,7 +121,7 @@ let fileStream (folder: string) (filename: string): FileStream option =
 /// <summary>
 /// Writes the given content into the given file using the default character encoding.
 /// </summary>
-let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: string) (content: string) : bool =
+let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: Path) (content: string) : bool =
     try
         persistor(filename, content)
         true
