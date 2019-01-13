@@ -1,10 +1,22 @@
 module WebApi.Helpers
 open System.Collections.Generic
+open Giraffe
+open Microsoft.AspNetCore.Http
 
-type PathName =
-    | FolderName of string
-    | FileName of string
-    | Path of string
+let errorCodeToView (statusCode: int) =
+    match statusCode with
+    | 400 -> Views.badRequestView
+    | 404 -> Views.notFoundView
+    | 500 -> Views.internalErrorView
+    | _   -> Views.badRequestView
+
+/// <summary>
+/// Sets the error status code and the error message in the given context.
+/// </Summary>
+let failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (statusCode: int) (message: string) =
+    do ctx.SetStatusCode(statusCode)
+    do ctx.Items.Add("errormessage", message)
+    (statusCode |> errorCodeToView) "message" |> htmlView
 
 /// <summary>
 /// Maps items of a collection and runs a filter afterwards. The original item is returned for all mapped items that passed the filter.
@@ -102,3 +114,20 @@ type System.String with
     static member IsNotNullOrWhiteSpace(s: string): bool =
         System.String.IsNullOrWhiteSpace(s) = false
 
+
+let requireParamterIn (get: string -> string option) (ctx: HttpContext) (required: string seq) (addToContext: bool) : HttpContext option =
+    let parameters = required |> Seq.map (fun p -> (p, p |> get))
+    
+    if parameters |> Seq.map snd |> containsNone then 
+        None 
+    else 
+        let parametersToAdd = if addToContext then parameters else Seq.empty
+        parametersToAdd 
+        |> Seq.filter (fun (_, result) -> match result with 
+                                          | Some s -> true 
+                                          | None   -> false)
+        |> Seq.map (fun (name, result) -> (name, Option.get result))
+        |> Seq.iter (fun (name, value) -> ctx.Items <- addIfNotExisting ctx.Items name value)
+        
+        Some ctx
+        

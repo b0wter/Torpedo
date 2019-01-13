@@ -49,14 +49,25 @@
    margin: 8px
 }
 
-#download-button {
+#action-button {
    background: white;
    border-radius: 10px;
    color: black;
 }
 
-#download-button:hover {
+#action-button:hover {
    background: #a380d6;
+}
+
+#subaction-button {
+   background: transparent;
+   border-radius: 10px;
+   border-color: white;
+}
+
+#subaction-button:hover {
+   background: white;
+   color: black;
 }
 
 .input-field {
@@ -71,3 +82,31 @@
    border-color: #a380d6 !important;
 }
 
+.centered-text {
+   text-align: center;
+}
+
+.margin-top-05em {
+   margin-top: 0.5em;
+}
+
+.link-text {
+   color: white;
+   text-decoration: underline
+}
+
+a:link {
+   color: white
+}
+
+a:visited {
+   color: white
+}
+
+a:hover {
+   color: white
+}
+
+a:active {
+   color: white
+}

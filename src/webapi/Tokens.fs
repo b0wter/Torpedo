@@ -59,3 +59,22 @@ let setExpirationTimeSpan (span: TimeSpan) =
 /// </summary>
 let tokenContainsValue (value: string) (token: Token) =
     token.Values |> Seq.exists (fun element -> element.Value = value)                                        
+
+/// <summary>
+/// Checks if a given token contains at least one valid token value.
+/// </summary>
+let isTokenStillValid (getLastWriteTime: string -> DateTime) (downloadLifeTime: TimeSpan) (token: Token) : bool =
+    let lastWriteCondition (token: Token) : bool =
+        let lastWrittenTo = getLastWriteTime token.TokenFilename
+        let threshold = lastWrittenTo + downloadLifeTime
+        DateTime.Now < threshold
+            
+    let valueCondition (token: Token) : bool =
+        let withExpiration = token.Values |> Seq.where (fun v -> match v.ExpirationDate with
+                                                                 | Some _ -> true
+                                                                 | None -> false)
+        withExpiration
+        |> Seq.exists (fun v -> (v.ExpirationDate.Value > DateTime.Now))
+        
+    (token |> lastWriteCondition) && (token |> valueCondition)
+        

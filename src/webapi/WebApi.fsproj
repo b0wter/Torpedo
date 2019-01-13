@@ -9,15 +9,16 @@
   <ItemGroup>
     <Compile Include="Seq.fs" />
     <Compile Include="Configuration.fs" />
+    <Compile Include="Views.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="Tokens.fs" />
     <Compile Include="TokenSerializer.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="FileAccess.fs" />
     <Compile Include="Cleanup.fs" />
-    <Compile Include="Views.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="DownloadHandler.fs" />
+    <Compile Include="UploadHandler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

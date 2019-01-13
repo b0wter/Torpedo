@@ -130,4 +130,15 @@ let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: 
         false
     
 let persistStringAsFile =
-    customPersistStringAsFile File.WriteAllText 
+    customPersistStringAsFile File.WriteAllText
+    
+/// <summary>
+/// Finds all sunbolders in a given folder. If includeBase is true the target folder will be included in the items as well.
+/// </summary>
+let getAllSubFolders (includeBase: bool) basePath =
+    let rec findFoldersRecursively (folder: FolderName) : FolderName list =
+        let subFolders = folder |> Directory.GetDirectories |> List.ofArray
+        let subSubFolders = subFolders |> List.collect (fun f -> Path.Combine(folder, f) |> findFoldersRecursively)
+        subFolders @ subSubFolders
+    let subFolders = basePath |> findFoldersRecursively
+    if includeBase then basePath :: subFolders else subFolders    

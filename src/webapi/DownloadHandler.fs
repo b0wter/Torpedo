@@ -1,27 +1,20 @@
 module WebApi.DownloadHandler
 
 open System
-open System.Net.Mime
-open System.Numerics
-open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Microsoft.Extensions.Primitives
 open Giraffe
 open WebApi
+open WebApi.Helpers
 
+/// <summary>
+/// Definition of an error which defines a statuscode and a reason.
+/// </summary>
 type DownloadError = {
     StatusCode: int;
     Reason: string;
 }
-
-/// <summary>
-/// Sets the error status code and the error message in the given context.
-/// </Summary>
-let private failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (statusCode: int) (message: string) =
-    do ctx.SetStatusCode(statusCode)
-    do ctx.Items.Add("errormessage", message)
-    next ctx
 
 /// <summary>
 /// Asynchronously writes a FileStream into a HTTP response.
@@ -63,20 +56,9 @@ let private createCompletePathAndFilename basePath filename =
 let requiresQueryParameters (parameters: string seq) (addToContex: bool) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let queryParameters = parameters |> Seq.map (fun p -> (p, p |> ctx.TryGetQueryStringValue))
-            
-            if queryParameters |> Seq.map snd |> Helpers.containsNone then 
-                return None
-            else 
-                let parametersToAdd = if addToContex then queryParameters else Seq.empty
-                parametersToAdd 
-                |> Seq.filter (fun (_, result) -> match result with 
-                                                  | Some s -> true 
-                                                  | None   -> false)
-                |> Seq.map (fun (name, result) -> (name, Option.get result))
-                |> Seq.iter (fun (name, value) -> ctx.Items <- Helpers.addIfNotExisting ctx.Items name value)
-                
-                return! next ctx
+            match Helpers.requireParamterIn (ctx.TryGetQueryStringValue) ctx parameters addToContex with
+            | Some context -> return! next context
+            | None         -> return None
         }
 
 /// <summary>

@@ -6,9 +6,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
 
-let footer = tag "footer"
-
-let headTags =
+let private headTags =
     [
         title [] [ str "Torpedo" ]
         
@@ -43,12 +41,12 @@ let headTags =
         meta [ _name "viewport"; _content "width=device-width, initial-scale=1"]
     ]
     
-let footerView =
+let private footerView =
     div [ _id "footer" ] [
         img [ _src "/images/logo_white.png"; _id "footer-image" ]
     ]
 
-let masterView (content: XmlNode list) =
+let private masterView (content: XmlNode list) =
     html [ _id "background" ] [
         head [] headTags
 
@@ -65,11 +63,22 @@ let masterView (content: XmlNode list) =
         ]
     ]
     
-let inputBoxView =     
+let private inputBoxView =     
     div [ _class "input-group vertical" ] [
         input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
         input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-        button [ _type "button"; _onclick "readAndRedirect()"; _id "download-button" ] [ str "Download" ]
+        button [ _type "button"; _onclick "readAndRedirect()"; _id "action-button" ] [ str "Download" ]
+        a [ _href "upload"; _class "centered-text margin-top-05em link-text" ] [ str "If you have an upload token, click here."]
+    ]
+
+let private uploadInputBoxView =
+    form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post" ] [
+        div [ _class "input-group vertical" ] [
+            input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
+            input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file" ]
+            button [ _type "submit" ] [ str "Upload" ]
+            a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
+        ]
     ]
     
 let indexView =
@@ -104,5 +113,21 @@ let internalErrorView (message: string) =
         p [] [ str message ]
         p [] [ str "Try again :)" ]
         inputBoxView
+    ]
+    |> masterView
+
+let uploadView =
+    [
+        h1 [] [ str "File Upload" ]
+        p [] [ str "If you have an upload token you can use it here to upload files."]
+        uploadInputBoxView
+    ]
+    |> masterView
+    
+let uploadFinishedView =
+    [
+        h1 [] [ str "Upload successful!" ]
+        p [] [ str "You can now close this browser tab or return to a previous page." ]
+        a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
     ]
     |> masterView

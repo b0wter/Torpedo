@@ -2,8 +2,6 @@
 
 open System
 open System.Globalization
-open System.IO
-open System.Reflection.Metadata
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -13,11 +11,10 @@ open Microsoft.AspNetCore.StaticFiles
 open Giraffe
 open Microsoft.Extensions.Configuration
 open Newtonsoft.Json
-open Torpedo
 open WebApi
 open WebApi.DownloadHandler
+open WebApi.UploadHandler
 open WebApi.HttpHandlers
-open Hangfire
 open Hangfire
 open Hangfire.MemoryStorage
 
@@ -52,16 +49,31 @@ let requiresExistanceOfFile =
     requiresExistanceOfFileInContext
         Configuration.Configuration.Instance.BasePath
         
+let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
+    uploadWorkflow 
+        Configuration.Configuration.Instance.BasePath
+        
+let validateTokenInContextItems =
+    UploadHandler.validateTokenInContextItems
+        Configuration.Configuration.Instance.BasePath
+        
 let webApp =
     choose [
-        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> requiresExistanceOfFile >=> downloadFile >=> renderErrorCode
+        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> requiresExistanceOfFile >=> downloadFile 
         route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> (Views.internalErrorView "The file could not be found." |> htmlView)
         route "/api/download" >=> requiresQueryParameters [| "filename" |]          false >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
         route "/api/download" >=> requiresQueryParameters [| "token" |]             false >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
         route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
         
+//        route "/api/upload/validate" >=> requiresFormParameters [| "token" |] true >=> validateTokenInContextItems
+        route "/api/upload"   >=> requiresFormParameters [| "token" |] true >=> validateTokenInContextItems >=> uploadFile >=> renderErrorCode
+ 
         route "/" >=> (Views.indexView |> htmlView)
-        setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView) ]
+ 
+        route "/upload" >=> (Views.uploadView |> htmlView)
+ 
+        setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView)
+    ]
 
 // ---------------------------------
 // Error handler
