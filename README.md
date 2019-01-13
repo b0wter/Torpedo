@@ -14,13 +14,16 @@ The project is in a fully usable state.
 
 How To
 ======
+
+Setup downloads
+---------------
 For each downloadable file in your downloads folder you need to create a text file with the extension ".token".
 E.g. you have the files `cook.png` and `my_zipped_secret.zip` you need to add:
 
 * `cook.token` and
 * `my_zipped_secret.token`
 
-These files are simple text files that contain an arbitrary number of lines. Each of these lines is interpreted as a token.
+These files are simple text files that contain an arbitrary number of lines. Each of these lines is interpreted as a token value.
 A file might look like this:
 
 ```
@@ -28,25 +31,45 @@ abcdef
 12345678:2019-01-01
 ```
 
-The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token. You can add comments to the tokens:
+The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token. Expiration dates are set when a download of the given file is attempted. If you want to, you can set an expiration date manually or edit it with a text editor.
+
+You can add comments as well:
 
 ```
 abcdef # This is a comment.
 ```
 
-Download likes look like this:
+Download files
+--------------
+There are two ways to download files.
+
+Use direct links in the following form:
 
 ```
-https://myserver/api/download?filename=cook.png&token=abcdef
+http://myserver/api/download?filename=cook.png&token=abcdef
 ```
-
 Where `cook.png` is a route paramter for the file to download and `abcdef` is the validation token.
+Alternativly you open the root page:
 
-Last modified file timestamps are used to check if a download is too old to be served. Torpedo uses the token file as reference not the content file.
+```
+http://myserver
+```
 
-Why two lifetimes?
------------------
-Torpedo uses two different lifetimes for the following reasons: There are cases where you want to share a file with multiple people and have no idea when they will start downloading. Thus you need a long lifetime for the download itself. However, you also want to keep the file on the net as short as possible. Thats why the tokens themselves also expire. People will not have a lot of time to share "their" link with other people.
+and enter the filename and token into the input fields.
+
+Lifetime of downloads and tokens
+--------------------------------
+There are two checks that are performed before a download is served:
+
+### Lifetime of a download
+The "last written" timestamp of the token file (not the download file) is used to check how old the download is. If the timespan is larger than the `DownloadLifetime` value in the configuration the download is considered expired and will not be served.
+
+### Lifetime of a token value
+You can define any number of token values inside a token file (see above). The lifetime of each value is tracked individually and can bet set manually by simply writing a value into the .token file (see above).
+
+This means that you can create multiple download urls per file, e.h. for sharing with multiple users.
+
+This lifetime is a workaround for the fact that the webserver has no idea if a file download was successful. There might be any number of problems that's why a successful download cannot be tracked. That's why this lifetime gives people multiple chances to try and download the file.
 
 Configuration
 =============
