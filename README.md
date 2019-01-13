@@ -31,12 +31,13 @@ abcdef
 12345678:2019-01-01
 ```
 
-The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token. Expiration dates are set when a download of the given file is attempted. If you want to, you can set an expiration date manually or edit it with a text editor.
+The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token value. Expiration dates are set when a download of the given file is attempted. If you want to, you can set an expiration date manually or edit a previously written date using a text editor.
 
 You can add comments as well:
 
 ```
 abcdef # This is a comment.
+123456:2019-01-01 # This is also a comment.
 ```
 
 Download files
@@ -130,7 +131,3 @@ Downloads can easily be created manually. However, this repository contains a ba
 ```
 
 This will automatically create a random password (using /dev/random), zip the given files, copy the zip to the destination folder and create a new token file with a random token. Please make sure that you write down the password created for the new download as it cannot be recovered!
-
-Todo
-====
-* Crons to periodically delete old files.
