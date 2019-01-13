@@ -14,7 +14,7 @@ if [ "$#" -ge 4 ]; then
 	TOKEN_FILE=$(basename -- "$3" ".7z")
 	echo "$TOKEN" >> "$2/${TOKEN_FILE}.token"
 
-	echo "The following password is NOT recoverable! Please write them down carefully."
+	echo "The following password is NOT recoverable! Please write it down carefully."
 	echo "7z password:    $PASSWORD"
 	echo "The download token was written to $2/${TOKEN_FILE}.token."
 	echo "Download token: $TOKEN"
