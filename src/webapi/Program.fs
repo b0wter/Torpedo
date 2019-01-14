@@ -7,16 +7,17 @@ open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.AspNetCore.StaticFiles
 open Giraffe
-open Microsoft.Extensions.Configuration
 open Newtonsoft.Json
 open WebApi
 open WebApi.DownloadHandler
 open WebApi.UploadHandler
 open WebApi.HttpHandlers
-open Hangfire
+open WebApi.Configuration
 open Hangfire.MemoryStorage
+open Hangfire
+open Microsoft.AspNetCore.Http.Features
+open Microsoft.AspNetCore.Http.Features
 
 // ---------------------------------
 // Web app
@@ -33,43 +34,45 @@ let invariant = CultureInfo.InvariantCulture
 let updateConfigFromLocalFile =
     if System.IO.File.Exists("config.json") then 
         let config = System.IO.File.ReadAllText("config.json")
-                     |> JsonConvert.DeserializeObject<Configuration.Configuration>
-        do Configuration.Configuration.Instance <- config
+                     |> JsonConvert.DeserializeObject<Configuration>
+        do Configuration.Instance <- config
         true
     else
         false
         
 let downloadFile =
     downloadWorkflow 
-        Configuration.Configuration.Instance.BasePath
-        Configuration.Configuration.Instance.DownloadLifeTime
-        Configuration.Configuration.Instance.TokenLifeTime
+        Configuration.Instance.BasePath
+        Configuration.Instance.DownloadLifeTime
+        Configuration.Instance.TokenLifeTime
         
 let requiresExistanceOfFile =
     requiresExistanceOfFileInContext
-        Configuration.Configuration.Instance.BasePath
+        Configuration.Instance.BasePath
         
 let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
     uploadWorkflow 
         Configuration.Configuration.Instance.BasePath
         
-let validateTokenInContextItems =
-    UploadHandler.validateTokenInContextItems
+        (*
+let validateTokenInContextItems : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
+    validateTokenInContextItems
         Configuration.Configuration.Instance.BasePath
+        *)
         
 let webApp =
     choose [
+        (* Route for the download api. *)
         route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> requiresExistanceOfFile >=> downloadFile 
         route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> (Views.internalErrorView "The file could not be found." |> htmlView)
         route "/api/download" >=> requiresQueryParameters [| "filename" |]          false >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
         route "/api/download" >=> requiresQueryParameters [| "token" |]             false >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
         route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
+        route "/" >=> (Views.indexView |> htmlView)
         
 //        route "/api/upload/validate" >=> requiresFormParameters [| "token" |] true >=> validateTokenInContextItems
-        route "/api/upload"   >=> requiresFormParameters [| "token" |] true >=> validateTokenInContextItems >=> uploadFile >=> renderErrorCode
- 
-        route "/" >=> (Views.indexView |> htmlView)
- 
+        (* Route for the upload api. *)
+        route "/api/upload"   >=> requiresFormParameters [| "token" |] true >=> uploadFile >=> (Views.uploadFinishedView |> htmlView)
         route "/upload" >=> (Views.uploadView |> htmlView)
  
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView)
@@ -88,9 +91,9 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let cleanOldDownloads () =
-    Cleanup.cleanAll Configuration.Configuration.Instance.BasePath
-                     Configuration.Configuration.Instance.TokenLifeTime
-                     Configuration.Configuration.Instance.DownloadLifeTime
+    Cleanup.cleanAll Configuration.Instance.BasePath
+                     Configuration.Instance.TokenLifeTime
+                     Configuration.Instance.DownloadLifeTime
 // ---------------------------------
 // Config and Main
 // ---------------------------------
@@ -116,10 +119,13 @@ let configureServices (services : IServiceCollection) =
     services.AddHangfire(
         fun c -> 
             c.UseMemoryStorage() |> ignore
-            do RecurringJob.AddOrUpdate((fun () -> do cleanOldDownloads ()), Cron.HourInterval Configuration.Configuration.Instance.CronIntervalInHours)
+            do RecurringJob.AddOrUpdate((fun () -> do cleanOldDownloads ()), Cron.HourInterval Configuration.Instance.CronIntervalInHours)
         ) |> ignore
     services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
+    services.Configure<FormOptions>(fun (x: FormOptions) -> x.ValueLengthLimit <- Int32.MaxValue
+                                                            x.MultipartBodyLengthLimit <- Int64.MaxValue)
+    |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
     builder.AddFilter(fun l -> l.Equals LogLevel.Error)
@@ -142,7 +148,7 @@ let exitWithError error =
 /// </summary>
 let buildKestrel () =
     WebHostBuilder()
-     .UseKestrel()
+     .UseKestrel(fun options -> options.Limits.MaxRequestBodySize <- Nullable<Int64>(1536L * 1024L * 1024L))
      .UseIISIntegration()
      .UseWebRoot(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"))
      .Configure(Action<IApplicationBuilder> configureApp)
@@ -153,11 +159,11 @@ let buildKestrel () =
 [<EntryPoint>]
 let main _ =
     if updateConfigFromLocalFile then 
-        if Configuration.Configuration.Instance.BasePath |> System.IO.Directory.Exists then
-            let host = buildKestrel ()       
+        if Configuration.Instance.BasePath |> System.IO.Directory.Exists then
+            let host = buildKestrel ()
             do host.Run ()
             0
         else 
-            exitWithError (sprintf "The 'BasePath' set in your 'config.json' does not exist or is not accesible.%sValue: %s" Environment.NewLine Configuration.Configuration.Instance.BasePath)
+            exitWithError (sprintf "The 'BasePath' set in your 'config.json' does not exist or is not accesible.%sValue: %s" Environment.NewLine Configuration.Instance.BasePath)
     else
         exitWithError "Could not find 'config.json' in the application startup path."

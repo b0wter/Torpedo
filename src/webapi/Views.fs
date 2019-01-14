@@ -72,11 +72,11 @@ let private inputBoxView =
     ]
 
 let private uploadInputBoxView =
-    form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post" ] [
-        div [ _class "input-group vertical" ] [
+    form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
+        div [ _class "input-group vertical invisible-form" ] [
             input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-            input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file" ]
-            button [ _type "submit" ] [ str "Upload" ]
+            input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
+            button [ _type "submit"; _id "action-button" ] [ str "Upload" ]
             a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
         ]
     ]

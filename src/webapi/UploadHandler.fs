@@ -11,37 +11,45 @@ let requiresFormParameters (parameters: string seq) (addToContext: bool) : HttpH
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
             let findInFormItems (ctx: HttpContext) key =
-                if ctx.Request.Form.ContainsKey(key) then
-                    Some ctx.Request.Form.[key].[0]
-                else
+                match ctx.Request.ContentType.StartsWith("multipart/form-data") with
+                | true ->
+                    if ctx.Request.Form.ContainsKey(key) then
+                        Some ctx.Request.Form.[key].[0]
+                    else
+                        None
+                | false ->
                     None
                     
             match Helpers.requireParamterIn (findInFormItems ctx) ctx parameters addToContext with
             | Some context -> return! next context
-            | None         -> return! (failWithStatusCodeAndMessage ctx next 400 "You have not supplied a token.")
+            | None         -> return! (failWithStatusCodeAndMessage ctx next 400 "You have not supplied a token." next ctx)
         }
 
+(*
 let validateTokenInContextItems basePath =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            return None
+            match ctx.Request.Form
         }
+        *)
 
 let uploadWorkflow (basePath: string) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
             do sprintf "%s" (ctx.Request.ContentType) |> ignore
             return! (match ctx.Request.HasFormContentType with
-                     | false -> (failWithStatusCodeAndMessage ctx next 500 "Form did not include any files.") //RequestErrors.BAD_REQUEST "Bad request"
+                     | false ->
+                         do printfn "Request does not have form content-type."
+                         (failWithStatusCodeAndMessage ctx next 500 "Form did not include any files.") next ctx
                      | true  -> 
                         printfn "Upload contains %d files." (ctx.Request.Form.Files.Count)
                         do ctx.Request.Form.Keys |> Seq.iter (printfn "%A")
                         ctx.Request.Form.Files
                         |> Seq.iter (fun file -> let stream = System.IO.File.OpenWrite(System.IO.Path.Combine(basePath, file.FileName))
-                                                 printfn "Upload for %s." file.FileName
+                                                 do printfn "Upload for %s." file.FileName
                                                  file.CopyTo(stream)
                                                  stream.Flush()
                                                  stream.Close())
-                        (WebApi.Views.uploadFinishedView |> htmlView) next ctx
+                        next ctx
                      )
         }

@@ -95,6 +95,17 @@
    text-decoration: underline
 }
 
+.invisible-form {
+   background: transparent;
+   border-width: 0;
+   padding: 0;
+   margin: 0;
+}
+
+.file-chooser-margin {
+   margin: 8px;
+}
+
 a:link {
    color: white
 }

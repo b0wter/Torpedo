@@ -33,7 +33,9 @@ let private getFileStreamResponseAsync folder file downloadname (ctx: HttpContex
                 None
                 None
         | None ->
-            return! (failWithStatusCodeAndMessage ctx next 500 "Download stream not set. Please contact the administrator.")
+            //return! (failWithStatusCodeAndMessage ctx next 500 "Download stream not set. Please contact the administrator.")
+            return! next ctx
+            
     }
         
 /// <summary>
@@ -130,5 +132,5 @@ let downloadWorkflow (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeT
           
             match d with
             | Ok token -> return! (getFileStreamResponseAsync basePath filename filename ctx next)
-            | Error e  -> return! (failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason)
+            | Error e  -> return! next ctx//(failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason)
         }
