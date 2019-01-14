@@ -13,6 +13,7 @@ open WebApi
 open WebApi.DownloadHandler
 open WebApi.UploadHandler
 open WebApi.HttpHandlers
+open WebApi.Helpers
 open WebApi.Configuration
 open Hangfire.MemoryStorage
 open Hangfire
@@ -70,10 +71,11 @@ let webApp =
         route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
         route "/" >=> (Views.indexView |> htmlView)
         
-//        route "/api/upload/validate" >=> requiresFormParameters [| "token" |] true >=> validateTokenInContextItems
         (* Route for the upload api. *)
-        route "/api/upload"   >=> requiresFormParameters [| "token" |] true >=> uploadFile >=> (Views.uploadFinishedView |> htmlView)
-        route "/upload" >=> (Views.uploadView |> htmlView)
+        route "/api/upload" >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled) >=> requiresFormParameters [| "token" |] true >=> uploadFile >=> (Views.uploadFinishedView |> htmlView)
+        route "/api/upload" >=> (Views.featureNotEnabledview "file upload" |> htmlView)
+        route "/upload" >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled) >=> (Views.uploadView |> htmlView)
+        route "/upload" >=> (Views.featureNotEnabledview "file upload" |> htmlView)
  
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView)
     ]
@@ -94,6 +96,7 @@ let cleanOldDownloads () =
     Cleanup.cleanAll Configuration.Instance.BasePath
                      Configuration.Instance.TokenLifeTime
                      Configuration.Instance.DownloadLifeTime
+                     
 // ---------------------------------
 // Config and Main
 // ---------------------------------

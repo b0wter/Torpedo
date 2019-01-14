@@ -2,6 +2,7 @@ module WebApi.Helpers
 open System.Collections.Generic
 open Giraffe
 open Microsoft.AspNetCore.Http
+open FSharp.Control.Tasks.V2.ContextInsensitive
 
 let errorCodeToView (statusCode: int) =
     match statusCode with
@@ -131,3 +132,12 @@ let requireParamterIn (get: string -> string option) (ctx: HttpContext) (require
         
         Some ctx
         
+let requiresFeatureEnabled (featureCheck: unit -> bool) : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        task {
+            match featureCheck () with
+            | true  -> return! next ctx
+            | false -> return None
+        }
+    
+

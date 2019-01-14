@@ -14,6 +14,7 @@ type Configuration() =
         let mutable tokenLifeTime: TimeSpan = TimeSpan.FromDays(2.0)
         let mutable cleanExpiredDownloads: bool = false
         let mutable cronIntervalInHours: int = 24
+        let mutable uploadsEnabled: bool = false
         
         /// <summary>
         /// Use this Singleton to access the configuration from anywhere.
@@ -58,3 +59,10 @@ type Configuration() =
         member this.CronIntervalInHours
             with get() = cronIntervalInHours
             and set(value) = cronIntervalInHours <- value
+            
+        /// <summary>
+        /// Enables the upload feature.
+        /// </summary>
+        member this.UploadsEnabled
+            with get() = uploadsEnabled
+            and set(value) = uploadsEnabled <- value

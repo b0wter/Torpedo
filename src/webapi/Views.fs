@@ -133,3 +133,10 @@ let uploadFinishedView =
         ]
     ]
     |> masterView
+    
+let featureNotEnabledview (name: string) =
+    [
+        h1 [] [ str (sprintf "The %s feature is not enabled." name) ]
+        p [] [ str "If you think this should be enabled, please contact the administrator." ]
+    ]
+    |> masterView
