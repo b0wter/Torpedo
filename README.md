@@ -15,6 +15,10 @@ The project is in a fully usable state.
 How To
 ======
 
+Disclaimer
+----------
+Please note that I am not a security expert! This software is not built with security as its top-most priority. Use this software at your own risk and use common sense!
+
 Setup downloads
 ---------------
 For each downloadable file in your downloads folder you need to create a text file with the extension ".token".
