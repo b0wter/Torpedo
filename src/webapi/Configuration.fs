@@ -4,8 +4,7 @@ open Newtonsoft.Json
 open System
 
 /// <summary>
-/// Contains all user-configurable settings. Is automatically filled by the ASP .NET Core framework.
-/// (see Program.fs -> tryBindConfiguration)
+/// Contains all user-configurable settings.
 /// </summary>
 type Configuration() =
         [<JsonIgnore>]
