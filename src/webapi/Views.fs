@@ -6,7 +6,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
 
-let private headTags =
+let private headTags (scripts: string list) =
     [
         title [] [ str "Torpedo" ]
         
@@ -18,8 +18,6 @@ let private headTags =
                _type "text/css"
                _href "/css/custom.css" ]       
                
-        script [ _src "/js/custom.js" ] []
-                
         link [ _rel "apple-touch-icon"; _sizes "57x57";   _href "/images/favicon/apple-icon-57x57.png" ]
         link [ _rel "apple-touch-icon"; _sizes "60x60";   _href "/images/favicon/apple-icon-60x60.png" ]
         link [ _rel "apple-touch-icon"; _sizes "72x72";   _href "/images/favicon/apple-icon-72x72.png" ]
@@ -40,15 +38,16 @@ let private headTags =
         
         meta [ _name "viewport"; _content "width=device-width, initial-scale=1"]
     ]
+    @ (scripts |> List.map (fun s -> script [ _src (sprintf "/js/%s" s) ] []))
     
 let private footerView =
     div [ _id "footer" ] [
         img [ _src "/images/logo_white.png"; _id "footer-image" ]
     ]
 
-let private masterView (content: XmlNode list) =
+let private masterView (scripts: string list) (content: XmlNode list) =
     html [ _id "background" ] [
-        head [] headTags
+        head [] (scripts |> headTags)
 
         body [ _class "transparent" ] [
         
@@ -75,8 +74,9 @@ let private uploadInputBoxView =
     form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
         div [ _class "input-group vertical invisible-form" ] [
             input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
+            button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()" ] [ str "Validate" ]
             input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
-            button [ _type "submit"; _id "action-button" ] [ str "Upload" ]
+            button [ _type "submit"; _id "action-button"; _disabled ] [ str "Upload" ]
             a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
         ]
     ]
@@ -87,7 +87,7 @@ let indexView =
         p [] [ str "Enter the filename and your download token into the fields below." ]
         inputBoxView
     ]
-    |> masterView
+    |> masterView [ "download.js" ]
     
 let badRequestView (message: string) =
     [
@@ -96,7 +96,7 @@ let badRequestView (message: string) =
         p [] [ str "Try again :)" ]
         inputBoxView
     ]    
-    |> masterView
+    |> masterView []
     
 let notFoundView (message: string) =
     [
@@ -105,7 +105,7 @@ let notFoundView (message: string) =
         p [] [ str "Try again :)" ]
         inputBoxView
     ]
-    |> masterView
+    |> masterView []
     
 let internalErrorView (message: string) =
     [
@@ -114,7 +114,7 @@ let internalErrorView (message: string) =
         p [] [ str "Try again :)" ]
         inputBoxView
     ]
-    |> masterView
+    |> masterView []
 
 let uploadView =
     [
@@ -122,7 +122,7 @@ let uploadView =
         p [] [ str "If you have an upload token you can use it here to upload files."]
         uploadInputBoxView
     ]
-    |> masterView
+    |> masterView [ "upload.js" ]
     
 let uploadFinishedView =
     [
@@ -132,11 +132,11 @@ let uploadFinishedView =
             a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
         ]
     ]
-    |> masterView
+    |> masterView []
     
 let featureNotEnabledview (name: string) =
     [
         h1 [] [ str (sprintf "The %s feature is not enabled." name) ]
         p [] [ str "If you think this should be enabled, please contact the administrator." ]
     ]
-    |> masterView
+    |> masterView []

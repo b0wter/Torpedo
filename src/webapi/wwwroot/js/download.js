@@ -1,3 +1,6 @@
+/*
+    Code for the download page.
+ */
 function redirectToDownload(filename, token) {
     window.location.href = "/api/download?filename=" + filename + "&token=" + token;
 }
@@ -29,7 +32,7 @@ function makeEnterOnFieldClickForButton(field, button) {
 }
 
 function onDocumentReady() {
-    var button = document.getElementById('download-button');
+    var button = document.getElementById('action-button');
     var downloadField = document.getElementById('filename');
     var tokenField = document.getElementById('token');
     makeEnterOnFieldClickForButton(downloadField, button);

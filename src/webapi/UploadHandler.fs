@@ -5,6 +5,7 @@ open Giraffe
 open WebApi
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open Giraffe
 open WebApi.Helpers
 
 let requiresFormParameters (parameters: string seq) (addToContext: bool) : HttpHandler =
@@ -25,18 +26,16 @@ let requiresFormParameters (parameters: string seq) (addToContext: bool) : HttpH
             | None         -> return! (failWithStatusCodeAndMessage ctx next 400 "You have not supplied a token." next ctx)
         }
 
-(*
 let validateTokenInContextItems basePath =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            match ctx.Request.Form
+            // TODO: needs implementation!
+            return! next ctx
         }
-        *)
         
 let uploadWorkflow (basePath: string) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            do sprintf "%s" (ctx.Request.ContentType) |> ignore
             return! (match ctx.Request.HasFormContentType with
                      | false ->
                          do printfn "Request does not have form content-type."
@@ -52,4 +51,10 @@ let uploadWorkflow (basePath: string) : HttpHandler =
                                                  stream.Close())
                         next ctx
                      )
+        }
+        
+let validateUploadToken (basePath: string) : HttpHandler =
+    fun (next: HttpFunc) (ctx: HttpContext) ->
+        task {
+            return! ("true" |> text) next ctx
         }

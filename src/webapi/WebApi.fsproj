@@ -71,7 +71,8 @@
     <Content Include="wwwroot\images\favicon\ms-icon-150x150.png" />
     <Content Include="wwwroot\images\favicon\ms-icon-310x310.png" />
     <Content Include="wwwroot\images\favicon\ms-icon-70x70.png" />
-    <Content Include="wwwroot\js\custom.js" />
+    <Content Include="wwwroot\js\download.js" />
+    <Content Include="wwwroot\js\upload.js" />
   </ItemGroup>
 
 </Project>

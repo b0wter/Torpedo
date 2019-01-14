@@ -55,27 +55,52 @@ let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncRe
     uploadWorkflow 
         Configuration.Configuration.Instance.BasePath
         
-        (*
 let validateTokenInContextItems : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
     validateTokenInContextItems
         Configuration.Configuration.Instance.BasePath
-        *)
+        
+let validateUplodTokenInBaseFolder : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
+    validateUploadToken
+        Configuration.Instance.BasePath
         
 let webApp =
     choose [
         (* Route for the download api. *)
-        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> requiresExistanceOfFile >=> downloadFile 
-        route "/api/download" >=> requiresQueryParameters [| "filename"; "token" |] true  >=> (Views.internalErrorView "The file could not be found." |> htmlView)
-        route "/api/download" >=> requiresQueryParameters [| "filename" |]          false >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
-        route "/api/download" >=> requiresQueryParameters [| "token" |]             false >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
-        route "/api/download" >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
-        route "/" >=> (Views.indexView |> htmlView)
+        route "/api/download"
+            >=> requiresQueryParameters [| "filename"; "token" |] true
+            >=> requiresExistanceOfFile
+            >=> downloadFile 
+        route "/api/download"
+            >=> requiresQueryParameters [| "filename"; "token" |] true
+            >=> (Views.internalErrorView "The file could not be found." |> htmlView)
+        route "/api/download"
+            >=> requiresQueryParameters [| "filename" |] false
+            >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
+        route "/api/download"
+            >=> requiresQueryParameters [| "token" |] false
+            >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
+        route "/api/download"
+            >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
+        route "/"
+            >=> (Views.indexView |> htmlView)
         
         (* Route for the upload api. *)
-        route "/api/upload" >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled) >=> requiresFormParameters [| "token" |] true >=> uploadFile >=> (Views.uploadFinishedView |> htmlView)
-        route "/api/upload" >=> (Views.featureNotEnabledview "file upload" |> htmlView)
-        route "/upload" >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled) >=> (Views.uploadView |> htmlView)
-        route "/upload" >=> (Views.featureNotEnabledview "file upload" |> htmlView)
+        route "/api/upload"
+            >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled)
+            >=> requiresFormParameters [| "token" |] true
+            >=> validateTokenInContextItems
+            >=> uploadFile
+            >=> (Views.uploadFinishedView |> htmlView)
+        route "/api/upload"
+            >=> (Views.featureNotEnabledview "file upload" |> htmlView)
+        route "/api/upload/validate"
+            >=> requiresFormParameters [| "token" |] true
+            >=> validateUplodTokenInBaseFolder
+        route "/upload"
+            >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled)
+            >=> (Views.uploadView |> htmlView)
+        route "/upload"
+            >=> (Views.featureNotEnabledview "file upload" |> htmlView)
  
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView)
     ]
