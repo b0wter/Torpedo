@@ -128,6 +128,8 @@ let uploadFinishedView =
     [
         h1 [] [ str "Upload successful!" ]
         p [] [ str "You can now close this browser tab or return to a previous page." ]
-        a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
+        div [ _class "padding-8px" ] [
+            a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
+        ]
     ]
     |> masterView
