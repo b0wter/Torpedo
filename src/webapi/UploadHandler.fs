@@ -1,12 +1,14 @@
 module WebApi.UploadHandler
 
 open System
+open System.IO
 open Giraffe
 open WebApi
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open WebApi.Helpers
+open WebApi.TokenSerializer
 
 let requiresFormParameters (parameters: string seq) (addToContext: bool) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
@@ -34,6 +36,7 @@ let validateTokenInContextItems basePath =
         }
         
 let uploadWorkflow (basePath: string) : HttpHandler =
+    // TODO: Remove references to System.IO methods: Path.Combine & Path.GetDirectory.
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
             return! (match ctx.Request.HasFormContentType with
@@ -43,8 +46,9 @@ let uploadWorkflow (basePath: string) : HttpHandler =
                      | true  -> 
                         printfn "Upload contains %d files." (ctx.Request.Form.Files.Count)
                         do ctx.Request.Form.Keys |> Seq.iter (printfn "%A")
+                        let path = ctx.Items.["folder"].ToString() |> System.IO.Path.GetDirectoryName
                         ctx.Request.Form.Files
-                        |> Seq.iter (fun file -> let stream = System.IO.File.OpenWrite(System.IO.Path.Combine(basePath, file.FileName))
+                        |> Seq.iter (fun file -> let stream = System.IO.File.OpenWrite(System.IO.Path.Combine(path, file.FileName))
                                                  do printfn "Upload for %s." file.FileName
                                                  file.CopyTo(stream)
                                                  stream.Flush()
@@ -53,8 +57,23 @@ let uploadWorkflow (basePath: string) : HttpHandler =
                      )
         }
         
-let validateUploadToken (basePath: string) : HttpHandler =
+let validateUploadToken (basePath: string) (onSuccess: HttpHandler) (onError: HttpHandler): HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            return! ("true" |> text) next ctx
+            let files = basePath |> FileAccess.getFilesFromFolder
+            let tokens = files
+                         |> List.map (fun s -> s |> FileAccess.getTextContent |> TokenValueContent.AsTotal |> (TokenSerializer.deserializeToken s ""))
+                         |> filterOks
+                         
+            let toSearch = (string)ctx.Items.["token"]
+            let result = tokens |> Tokens.findTokenContainingValue toSearch
+            match result with
+            | None -> return! (onError next ctx) //("false" |> text) next ctx
+            | Some token ->
+                match token |> (Tokens.isTokenStillValid Configuration.Configuration.Instance.DownloadLifeTime) with
+                | true ->
+                    do ctx.Items.Add("folder", token.TokenFilename)
+                    return! (onSuccess next ctx) //("true" |> text) next ctx
+                | false ->
+                    return! (onError next ctx) //("false" |> text) next ctx
         }

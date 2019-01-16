@@ -55,13 +55,23 @@ let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncRe
     uploadWorkflow 
         Configuration.Configuration.Instance.BasePath
         
+        (*
 let validateTokenInContextItems : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
     validateTokenInContextItems
         Configuration.Configuration.Instance.BasePath
+        *)
         
-let validateUplodTokenInBaseFolder : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
+let validateUploadTokenAndExit : HttpHandler =
     validateUploadToken
         Configuration.Instance.BasePath
+        (fun next ctx -> ("true" |> Giraffe.ResponseWriters.text) next ctx)
+        (fun next ctx -> ("false" |> Giraffe.ResponseWriters.text) next ctx)
+        
+let validateUploadTokenAndContinue : HttpHandler =
+    validateUploadToken
+        Configuration.Instance.BasePath
+        (fun next ctx -> next ctx)
+        (fun next ctx -> ((Views.notFoundView "The given token is unknown.") |> htmlView) next ctx)
         
 let webApp =
     choose [
@@ -72,7 +82,7 @@ let webApp =
             >=> downloadFile 
         route "/api/download"
             >=> requiresQueryParameters [| "filename"; "token" |] true
-            >=> (Views.internalErrorView "The file could not be found." |> htmlView)
+            >=> (Views.notFoundView "The file could not be found." |> htmlView)
         route "/api/download"
             >=> requiresQueryParameters [| "filename" |] false
             >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
@@ -88,14 +98,15 @@ let webApp =
         route "/api/upload"
             >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled)
             >=> requiresFormParameters [| "token" |] true
-            >=> validateTokenInContextItems
+            >=> (validateTokenInContextItems Configuration.Instance.BasePath)
+            >=> validateUploadTokenAndContinue
             >=> uploadFile
             >=> (Views.uploadFinishedView |> htmlView)
         route "/api/upload"
             >=> (Views.featureNotEnabledview "file upload" |> htmlView)
         route "/api/upload/validate"
             >=> requiresFormParameters [| "token" |] true
-            >=> validateUplodTokenInBaseFolder
+            >=> validateUploadTokenAndExit
         route "/upload"
             >=> requiresFeatureEnabled (fun () -> Configuration.Instance.UploadsEnabled)
             >=> (Views.uploadView |> htmlView)

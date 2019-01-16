@@ -49,23 +49,26 @@
    margin: 8px
 }
 
-#action-button {
-   background: white;
+.round-button {
    border-radius: 10px;
+}
+
+.action-button {
+   background: white;
    color: black;
 }
 
-#action-button:hover {
+.action-button:hover {
    background: #a380d6;
 }
 
-#subaction-button {
+.subaction-button {
    background: transparent;
    border-radius: 10px;
    border-color: white;
 }
 
-#subaction-button:hover {
+.subaction-button:hover {
    background: white;
    color: black;
 }
@@ -124,4 +127,31 @@ a:hover {
 
 a:active {
    color: white
+}
+
+.inputAndButton {
+   justify-content: space-between;
+   display: flex;
+}
+
+.width100percent {
+   width: 100%;
+}
+
+#success-button {
+   background: darkgreen;
+}
+
+#error-button {
+   background: darkred;
+}
+
+.success {
+   background: darkgreen !important;;
+   color: white;
+}
+
+.error {
+   background: darkred !important;
+   color: white;
 }

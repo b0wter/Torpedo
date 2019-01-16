@@ -1,6 +1,7 @@
 module WebApi.Tokens
 
 open System
+open System
 
 /// <summary>
 /// Part of a Token. A TokenValue represents a single value with its own expiration date.
@@ -60,21 +61,40 @@ let setExpirationTimeSpan (span: TimeSpan) =
 let tokenContainsValue (value: string) (token: Token) =
     token.Values |> Seq.exists (fun element -> element.Value = value)                                        
 
+let private isDateLargerThan (value: DateTime) (ifNone: bool) (toCheck: DateTime option) : bool =
+    match toCheck with
+    | Some date ->
+        value > date
+    | None ->
+        ifNone
+
 /// <summary>
 /// Checks if a given token contains at least one valid token value.
 /// </summary>
-let isTokenStillValid (getLastWriteTime: string -> DateTime) (downloadLifeTime: TimeSpan) (token: Token) : bool =
+let customIsTokenStillValid (getLastWriteTime: string -> DateTime) (downloadLifeTime: TimeSpan) (token: Token) : bool =
     let lastWriteCondition (token: Token) : bool =
         let lastWrittenTo = getLastWriteTime token.TokenFilename
         let threshold = lastWrittenTo + downloadLifeTime
-        DateTime.Now < threshold
+        let result = DateTime.Now < threshold
+        result
             
     let valueCondition (token: Token) : bool =
-        let withExpiration = token.Values |> Seq.where (fun v -> match v.ExpirationDate with
-                                                                 | Some _ -> true
-                                                                 | None -> false)
-        withExpiration
-        |> Seq.exists (fun v -> (v.ExpirationDate.Value > DateTime.Now))
+        let result = token.Values
+                     |> Seq.map (fun t -> t.ExpirationDate)
+                     |> Seq.exists (isDateLargerThan DateTime.Now true)
+        result
         
     (token |> lastWriteCondition) && (token |> valueCondition)
         
+let isTokenStillValid =
+    customIsTokenStillValid
+        IO.File.GetLastWriteTime
+        
+let containsValue (v: string) (t: Token) : bool =
+    t.Values |> Seq.exists(fun tv -> tv.Value = v)
+    
+let seqContainsValue (v: string) (t: Token seq) : bool =
+    t |> Seq.exists (containsValue v)
+    
+let findTokenContainingValue (v: string) (ts: Token seq): Token option =
+    ts |> Seq.tryFind(fun t -> t.Values |> Seq.exists (fun x -> x.Value = v))

@@ -141,4 +141,23 @@ let getAllSubFolders (includeBase: bool) basePath =
         let subSubFolders = subFolders |> List.collect (fun f -> Path.Combine(folder, f) |> findFoldersRecursively)
         subFolders @ subSubFolders
     let subFolders = basePath |> findFoldersRecursively
-    if includeBase then basePath :: subFolders else subFolders    
+    if includeBase then basePath :: subFolders else subFolders
+    
+let customGetFilesFromFolder (listFiles: string -> string array) (selector: string -> bool) (combinator: string -> string -> string) (path: string) =
+    let filesInFolder p =
+        let combinator = combinator p
+        p |> listFiles
+          |> Array.where selector
+          |> Array.map combinator
+          |> List.ofArray
+          
+    path
+    |> getAllSubFolders true
+    |> List.collect filesInFolder
+    
+let getFilesFromFolder =
+    customGetFilesFromFolder
+        IO.Directory.GetFiles
+        (fun s -> Path.GetFileName(s) = ".token")
+        (fun _ -> fun b -> b)
+        

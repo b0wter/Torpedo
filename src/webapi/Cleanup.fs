@@ -19,7 +19,7 @@ let private cleanFolder (downloadLifeTime: TimeSpan) (folder: FolderName) =
     
     let toDelete = pairs
                    |> filterOks
-                   |> Seq.filter (fun x -> x |> isTokenStillValid (File.GetLastWriteTime) downloadLifeTime |> not)
+                   |> Seq.filter (fun x -> x |> isTokenStillValid downloadLifeTime |> not)
     
     do toDelete
     |> Seq.iter (fun token -> [ token.TokenFilename; token.ContentFilename ] |> List.iter (fun s -> printfn "Deleting file: %s" s

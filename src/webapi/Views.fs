@@ -66,17 +66,19 @@ let private inputBoxView =
     div [ _class "input-group vertical" ] [
         input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
         input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-        button [ _type "button"; _onclick "readAndRedirect()"; _id "action-button" ] [ str "Download" ]
+        button [ _type "button"; _onclick "readAndRedirect()"; _id "action-button"; _class "action-button round-button" ] [ str "Download" ]
         a [ _href "upload"; _class "centered-text margin-top-05em link-text" ] [ str "If you have an upload token, click here."]
     ]
 
 let private uploadInputBoxView =
     form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
         div [ _class "input-group vertical invisible-form" ] [
-            input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-            button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()" ] [ str "Validate" ]
+            div [ _class "inputAndButton" ] [
+                input [ _type "text"; _class "transparent button-margin input-field width100percent"; _id "token"; _name "token"; _placeholder "Token" ]
+                button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()"; _class "action-button round-button" ] [ str "Validate" ]
+            ]
             input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
-            button [ _type "submit"; _id "action-button"; _disabled ] [ str "Upload" ]
+            button [ _type "submit"; _id "action-button"; _disabled; _class "action-button round-button"] [ str "Upload" ]
             a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
         ]
     ]
