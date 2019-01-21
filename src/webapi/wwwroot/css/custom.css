@@ -28,9 +28,9 @@
 #outer {
    display: table;
    position: absolute;
-   top: 0;
+   top: 40px;
    left: 0;
-   height: 100%;
+   height: calc(100% - 40px);
    width: 100%;
 }
 
@@ -154,4 +154,9 @@ a:active {
 .error {
    background: darkred !important;
    color: white;
+}
+
+#header {
+   padding: 10px;
+   position: absolute;
 }

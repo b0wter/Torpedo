@@ -132,5 +132,5 @@ let downloadWorkflow (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeT
           
             match d with
             | Ok token -> return! (getFileStreamResponseAsync basePath filename filename ctx next)
-            | Error e  -> return! next ctx//(failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason)
+            | Error e  -> return! (failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason next ctx)
         }

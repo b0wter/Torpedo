@@ -17,7 +17,7 @@ let errorCodeToView (statusCode: int) =
 let failWithStatusCodeAndMessage (ctx: HttpContext) (next: HttpFunc) (statusCode: int) (message: string) =
     do ctx.SetStatusCode(statusCode)
     do ctx.Items.Add("errormessage", message)
-    (statusCode |> errorCodeToView) "message" |> htmlView
+    (statusCode |> errorCodeToView) message |> htmlView
 
 /// <summary>
 /// Maps items of a collection and runs a filter afterwards. The original item is returned for all mapped items that passed the filter.

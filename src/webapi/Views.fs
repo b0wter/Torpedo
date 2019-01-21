@@ -40,6 +40,11 @@ let private headTags (scripts: string list) =
     ]
     @ (scripts |> List.map (fun s -> script [ _src (sprintf "/js/%s" s) ] []))
     
+let private headerView =
+    div [ _id "header" ] [
+        a [ _href "/about"; _class "centered-text margin-top-05em link-text" ] [ str "About"]
+    ]
+    
 let private footerView =
     div [ _id "footer" ] [
         img [ _src "/images/logo_white.png"; _id "footer-image" ]
@@ -48,13 +53,15 @@ let private footerView =
 let private masterView (scripts: string list) (content: XmlNode list) =
     html [ _id "background" ] [
         head [] (scripts |> headTags)
-
-        body [ _class "transparent" ] [
         
-            div [ _id "outer" ] [
-                div [ _id "middle" ] [
-                    div [ _id "inner" ]
-                        content
+        body [ _class "transparent" ] [
+            headerView
+            div [] [
+                div [ _id "outer" ] [
+                    div [ _id "middle" ] [
+                        div [ _id "inner" ]
+                            content
+                    ]
                 ]
             ]
             
@@ -62,24 +69,30 @@ let private masterView (scripts: string list) (content: XmlNode list) =
         ]
     ]
     
-let private inputBoxView =     
-    div [ _class "input-group vertical" ] [
-        input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
-        input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
-        button [ _type "button"; _onclick "readAndRedirect()"; _id "action-button"; _class "action-button round-button" ] [ str "Download" ]
-        a [ _href "upload"; _class "centered-text margin-top-05em link-text" ] [ str "If you have an upload token, click here."]
+let private inputBoxView =
+    div [] [
+        script [ _src "/js/download.js" ] []
+        div [ _class "input-group vertical" ] [
+            input [ _type "text"; _class "transparent button-margin input-field"; _id "filename"; _name "filename" ; _placeholder "Filename" ]
+            input [ _type "text"; _class "transparent button-margin input-field"; _id "token"; _name "token"; _placeholder "Token" ]
+            button [ _type "button"; _onclick "readAndRedirect()"; _id "action-button"; _class "action-button round-button" ] [ str "Download" ]
+            a [ _href "/upload"; _class "centered-text margin-top-05em link-text" ] [ str "If you have an upload token, click here."]
+        ]
     ]
 
 let private uploadInputBoxView =
-    form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
-        div [ _class "input-group vertical invisible-form" ] [
-            div [ _class "inputAndButton" ] [
-                input [ _type "text"; _class "transparent button-margin input-field width100percent"; _id "token"; _name "token"; _placeholder "Token" ]
-                button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()"; _class "action-button round-button" ] [ str "Validate" ]
+    div [] [
+        script [ _src "/js/upload.js" ] []
+        form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
+            div [ _class "input-group vertical invisible-form" ] [
+                div [ _class "inputAndButton" ] [
+                    input [ _type "text"; _class "transparent button-margin input-field width100percent"; _id "token"; _name "token"; _placeholder "Token" ]
+                    button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()"; _class "action-button round-button" ] [ str "Validate" ]
+                ]
+                input [ _type "file"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
+                button [ _type "submit"; _id "action-button"; _disabled; _class "action-button round-button"] [ str "Upload" ]
+                a [ _href "/download"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
             ]
-            input [ _type "file"; _onclick "readAndRedirect()"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
-            button [ _type "submit"; _id "action-button"; _disabled; _class "action-button round-button"] [ str "Upload" ]
-            a [ _href "/"; _class "centered-text margin-top-05em link-text" ] [ str "If you have a download token and filename, click here."]
         ]
     ]
     
@@ -120,7 +133,7 @@ let internalErrorView (message: string) =
 
 let uploadView =
     [
-        h1 [] [ str "File Upload" ]
+        h1 [] [ str "Welcome to Torpedo" ]
         p [] [ str "If you have an upload token you can use it here to upload files."]
         uploadInputBoxView
     ]
@@ -140,5 +153,28 @@ let featureNotEnabledview (name: string) =
     [
         h1 [] [ str (sprintf "The %s feature is not enabled." name) ]
         p [] [ str "If you think this should be enabled, please contact the administrator." ]
+    ]
+    |> masterView []
+    
+let aboutView =
+    [
+        h1 [] [ str "Written with F# and ❤️" ]
+        div [] [
+            p [] [
+                span [] [ str "If you have feedback please email " ]
+                a [ _href "mailto:torpedo.http@gmail.com"; _class "centered-text margin-top-05em link-text" ] [ str "me"]
+                span [] [ str "." ]
+            ]
+            p [] [
+                span [] [ str "Fork me on " ]
+                a [ _href "https://github.com/b0wter/torpedo"; _class "centered-text margin-top-05em link-text" ] [ str "GitHub"]
+                span [] [ str "." ]
+            ]
+            br []
+            p [] [
+                a [ _href "javascript:history.back()"; _class "centered-text margin-top-05em link-text" ] [ str "BACK"]
+            ]
+            
+        ]
     ]
     |> masterView []

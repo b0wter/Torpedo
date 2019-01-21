@@ -55,12 +55,6 @@ let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncRe
     uploadWorkflow 
         Configuration.Configuration.Instance.BasePath
         
-        (*
-let validateTokenInContextItems : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
-    validateTokenInContextItems
-        Configuration.Configuration.Instance.BasePath
-        *)
-        
 let validateUploadTokenAndExit : HttpHandler =
     validateUploadToken
         Configuration.Instance.BasePath
@@ -91,7 +85,7 @@ let webApp =
             >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
         route "/api/download"
             >=> (Views.badRequestView "Your request is missing the 'filename' as well as the 'token' query parameters." |> htmlView)
-        route "/"
+        route "/download"
             >=> (Views.indexView |> htmlView)
         
         (* Route for the upload api. *)
@@ -113,6 +107,11 @@ let webApp =
         route "/upload"
             >=> (Views.featureNotEnabledview "file upload" |> htmlView)
  
+        (* general routes *)
+        route "/"
+            >=> redirectTo true "/download"
+        route "/about"
+            >=> (Views.aboutView |> htmlView)
         setStatusCode 404 >=> (Views.notFoundView "Page not found :(" |> htmlView)
     ]
 
@@ -163,7 +162,7 @@ let configureServices (services : IServiceCollection) =
     services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
     services.Configure<FormOptions>(fun (x: FormOptions) -> x.ValueLengthLimit <- Int32.MaxValue
-                                                            x.MultipartBodyLengthLimit <- Int64.MaxValue)
+                                                            x.MultipartBodyLengthLimit <- Configuration.Instance.MaxUploadSize)
     |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =

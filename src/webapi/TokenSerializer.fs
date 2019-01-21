@@ -1,5 +1,7 @@
 module WebApi.TokenSerializer
 open System
+open System.Globalization
+open System.Globalization
 open System.IO
 open WebApi.Tokens
 open WebApi.Helpers
@@ -27,10 +29,10 @@ let serializeTokenValue (tokenvalue: TokenValue): string =
         
     let noneDateAsEmpty (prefix: string) (suffix: string) (d: DateTime option) =
         match d with 
-        | Some date -> sprintf "%s%s%s" prefix (date.ToString("yyyy-MM-dd")) suffix
+        | Some date -> sprintf "%s%s%s" prefix (date.ToString("yyyy-MM-dd HH:mm:ss")) suffix
         | None      -> ""
 
-    sprintf "%s%s%s" (tokenvalue.Value) (tokenvalue.ExpirationDate |> noneDateAsEmpty ":" "") (tokenvalue.Comment |> noneStringAsEmpty " # " "")
+    sprintf "%s%s%s" (tokenvalue.Value) (tokenvalue.ExpirationDate |> noneDateAsEmpty ";" "") (tokenvalue.Comment |> noneStringAsEmpty " # " "")
 
 /// <summary>
 /// Serializes a Token by serializing each TokenValue using the serializeTokenValue method.
@@ -54,17 +56,39 @@ let private trimTokenValue (token: string) =
      .TrimEnd(' ', '\t')
     
 /// <summary>
+/// Tries to parse the given string in a specific format. If that fails uses framework defaults to parse the date.
+/// If that fails returns None. Returns Some DateTime otherweise.
+/// </summary>
+let private parseStringAsDateTime (s: string) : DateTime option =
+    match DateTime.TryParseExact(s, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None) with
+    | (true, date) -> Some date
+    | (false, _)   ->
+        match DateTime.TryParse(s) with
+        | (true, date) -> Some date
+        | (false, _)   -> None
+    
+/// <summary>
 /// Deserializes a TokenValue.
 /// (See serializeTokenValue for format details.)
 /// </summary>    
 let deserializeTokenValue (content: string) : Result<TokenValue, string> =    
-    let content = content.Replace("#", ":")
+    let content = content.Replace("#", ";")
+    (*
+                                                       | [| value ; expiration; comment |] -> ( trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.ParseExact(expiration, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)); TokenValue.Comment = Some (comment.TrimStart(' ', '\t')) }
+                                                       | [| value ; expiration |]          -> ( TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.ParseExact(expiration, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)); TokenValue.Comment = None }
+                                                       | [| value |]                       -> ( TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = None; TokenValue.Comment = None }
+                                                       *)
     
-    match content.Split(":") with 
-    | [| value ; expiration; comment |] -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = Some (comment.TrimStart(' ', '\t')) }
-    | [| value ; expiration |]          -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = Some (DateTime.Parse(expiration)); TokenValue.Comment = None }    
-    | [| value |]                       -> Ok { TokenValue.Value = trimTokenValue value; TokenValue.ExpirationDate = None; TokenValue.Comment = None }
-    | _                                 -> Error "String split delivered zero or more than two parts."
+    let (value, expiration, comment, shouldHaveDate, isValid) = match content.Split(";") with 
+                                                                | [| value ; expiration; comment |] -> ( trimTokenValue value, (parseStringAsDateTime expiration), Some (comment.TrimStart(' ', '\t')), true, true )
+                                                                | [| value ; expiration |]          -> ( trimTokenValue value, (parseStringAsDateTime expiration), None, true, true )
+                                                                | [| value |]                       -> ( trimTokenValue value, None, None, false, true )
+                                                                | _                                 -> ( "", None, None, false, false)
+                                                                
+    if isValid && (if shouldHaveDate && expiration.IsNone then false else true) then
+        Ok { Value = value; ExpirationDate = expiration; Comment = comment }
+    else
+        Error "The string split returnd either to many or too few arguments or a token file contains an invalid date."
     
 /// <summary>
 /// Deserializes a Token by deserializing each line using deserializeTokenValue.

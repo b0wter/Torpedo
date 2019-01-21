@@ -35,7 +35,13 @@ abcdef
 12345678:2019-01-01
 ```
 
-The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token value. Expiration dates are set when a download of the given file is attempted. If you want to, you can set an expiration date manually or edit a previously written date using a text editor.
+The first value `abcdef` has not been used and therefor does not have an expiration date. The second value has been used and expires on the first of January 2019. The colon is not part of the token value. Expiration dates are set when a download of the given file is attempted. If you want to, you can set an expiration date manually or edit a previously written date using a text editor. Expiration can be given as:
+
+```
+yyyy-MM-dd HH:mm:ss
+yyyy-MM-dd
+yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz (ISO 8601)
+```
 
 You can add comments as well:
 
@@ -76,6 +82,45 @@ This means that you can create multiple download urls per file, e.h. for sharing
 
 This lifetime is a workaround for the fact that the webserver has no idea if a file download was successful. There might be any number of problems that's why a successful download cannot be tracked. That's why this lifetime gives people multiple chances to try and download the file.
 
+Setup Uploads
+-------------
+You can enable uploads for remote users. To do so you have to set `UploadsEnabled` to true. You may optionally define a maximum upload size by setting `MaxUploadSize` (bytes). Please note that there is a hardcoded size limit of ~1.5GB for remote uploads. This is because of the way ASP.NET Core and Giraffe handle uploads. Please note that uploads are *not* checked for malicious content!
+
+Uploads use the same `BasePath` as downloads. To enable uploads to a folder create a file named `.token`. This file follows the same syntax as the regular download token files.
+
+Upload files
+------------
+To upload a file you need to give an upload token to a remote user. The user needs to go to:
+
+```
+http://myserver/upload
+```
+
+and enter the token. The Upload-button is not enabled until the user validates his token. You can also use a tool like curl or wget to upload the file directly:
+
+```
+http://myserver/api/upload
+
+Method: POST
+Content: multipart/form-data
+Form parameter: token = $YOUR_TOKEN
+```
+
+Please note that the token is only verified *after* the file finished uploading. That's why the GUI requires the user to validate the token before starting the upload. If you want to upload a token in a script and want to check a token, you can do so by sending a request the following way:
+
+```
+const Http = new XMLHttpRequest();
+const url = "/api/upload/validate";
+const form = new FormData();
+
+form.append("token", token);
+
+Http.open("POST", url);
+Http.send(form);
+```
+
+You will either receive "true" or "false" as result.
+
 Configuration
 =============
 The application needs a configuration file to work properly. The file is written in json and looks like this:
@@ -85,7 +130,9 @@ The application needs a configuration file to work properly. The file is written
 	"DownloadLifetime": "7.00:00:00",
 	"TokenLifetime": "2.00:00:00",
 	"CleanExpiredDownloads": false,
-	"CronIntervalInHours": 24
+	"CronIntervalInHours": 24,
+	"UploadsEnabled": false,
+	"MaxUploadSize": 1073741824
 }
 
 ```
@@ -95,6 +142,8 @@ The application needs a configuration file to work properly. The file is written
 * *TokenLifetime*: Expiration time of a single token value. This is set the moment the first user uses this token. Given in the format $DAYS:HOURS:MINUTES:SECONDS.
 * *CleanExpiredDownloads*: Makes Torpedo periodically check all downloads and delete the token and content files for expired downloads.
 * *CronIntervalInHours*: Interval in which the aforementioned action is performed. Given in hours.
+* *UploadsEnabled*: Enables the upload feature for remote users. Note that you will still need to create upload tokens manually.
+* *MaxUploadSize*: Maximum size of uploads, given in bytes. Please note that the framework currently limits Torpedo to an upload size of about 1.5 GB.
 
 Docker
 ======
@@ -120,7 +169,7 @@ Images are auto-generated from this repository and can be found on [Docker Hub](
 
 HTTPS
 =====
-Currently there is no native support for certificates. I recommend running this app behind a reverse proxy (which may offer https).
+Currently there is no native support for certificates. I recommend running this app behind a reverse proxy (which may offer https). Either Caddy or Traefic are perfect choices to do so as they offer Let's Encrypt support out of the box.
 
 Creating downloads
 ==================
