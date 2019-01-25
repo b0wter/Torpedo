@@ -170,11 +170,11 @@ let aboutView =
                 a [ _href "https://github.com/b0wter/torpedo"; _class "centered-text margin-top-05em link-text" ] [ str "GitHub"]
                 span [] [ str "." ]
             ]
+            p [] [ small [] [ str "You are running ] ]
             br []
             p [] [
                 a [ _href "javascript:history.back()"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
             ]
-            
         ]
     ]
     |> masterView []
