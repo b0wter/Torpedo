@@ -44,12 +44,13 @@ let uploadWorkflow (basePath: string) : HttpHandler =
                          do printfn "Request does not have form content-type."
                          (failWithStatusCodeAndMessage ctx next 500 "Form did not include any files.") next ctx
                      | true  -> 
-                        printfn "Upload contains %d files." (ctx.Request.Form.Files.Count)
-                        do ctx.Request.Form.Keys |> Seq.iter (printfn "%A")
+                        do printfn "Upload contains %d files." (ctx.Request.Form.Files.Count)
                         let path = ctx.Items.["folder"].ToString() |> System.IO.Path.GetDirectoryName
                         ctx.Request.Form.Files
-                        |> Seq.iter (fun file -> let stream = System.IO.File.OpenWrite(System.IO.Path.Combine(path, file.FileName))
-                                                 do printfn "Upload for %s." file.FileName
+                        |> Seq.iter (fun file ->
+                                                 let newName = FileAccess.getUniqueFilename (System.IO.Path.Combine(path, file.FileName))
+                                                 let stream = System.IO.File.OpenWrite(newName)
+                                                 do printfn "Saving %s as %s." file.FileName newName
                                                  file.CopyTo(stream)
                                                  stream.Flush()
                                                  stream.Close())

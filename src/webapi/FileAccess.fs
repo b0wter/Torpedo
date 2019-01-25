@@ -161,3 +161,12 @@ let getFilesFromFolder =
         (fun s -> Path.GetFileName(s) = ".token")
         (fun _ -> fun b -> b)
         
+let getUniqueFilename filename =
+    let rec go (filename: string) (suffix: int) =
+        let newName = Path.Combine(Path.GetDirectoryName(filename), sprintf "%s_(%i)%s" (Path.GetFileNameWithoutExtension(filename)) suffix (Path.GetExtension(filename)))
+        if File.Exists(newName) then
+            go filename (suffix + 1)
+        else
+            newName
+    
+    go filename 1

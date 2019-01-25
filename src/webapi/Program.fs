@@ -162,7 +162,7 @@ let configureServices (services : IServiceCollection) =
     services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
     services.Configure<FormOptions>(fun (x: FormOptions) -> x.ValueLengthLimit <- Int32.MaxValue
-                                                            x.MultipartBodyLengthLimit <- Configuration.Instance.MaxUploadSize)
+                                                            x.MultipartBodyLengthLimit <- Int64.MaxValue)
     |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
@@ -186,7 +186,7 @@ let exitWithError error =
 /// </summary>
 let buildKestrel () =
     WebHostBuilder()
-     .UseKestrel(fun options -> options.Limits.MaxRequestBodySize <- Nullable<Int64>(1536L * 1024L * 1024L))
+     .UseKestrel(fun options -> options.Limits.MaxRequestBodySize <- System.Nullable())//Nullable<Int64>(Configuration.Instance.MaxUploadSize * 1024L * 1024L))
      .UseIISIntegration()
      .UseWebRoot(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"))
      .Configure(Action<IApplicationBuilder> configureApp)

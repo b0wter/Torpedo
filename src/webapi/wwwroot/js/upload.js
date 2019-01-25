@@ -6,6 +6,7 @@ function validateToken(token) {
     const url = "/api/upload/validate";
     const form = new FormData();
     
+    resetValidation();
     form.append("token", token);
     
     Http.addEventListener('error', function(event) {
@@ -31,9 +32,20 @@ function validateToken(token) {
     Http.send(form);
 }
 
+function resetValidation() {
+    removeClassFromElement('subaction-button', 'success');
+    removeClassFromElement('subaction-button', 'error');
+    document.getElementById("action-button").disabled = true;
+}
+
 function addClassToElement(elementId, className) {
     const e = document.getElementById(elementId);
     e.classList.add(className);
+}
+
+function removeClassFromElement(elementId, className) {
+    const e = document.getElementById(elementId);
+    e.classList.remove(className);
 }
 
 function onValidationButtonClick () {
@@ -42,7 +54,6 @@ function onValidationButtonClick () {
 }
 
 function onDocumentReady() {
-    console.log("doc loaded");
 }
 
 document.addEventListener('DOMContentLoaded', onDocumentReady, false);

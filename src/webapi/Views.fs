@@ -86,7 +86,7 @@ let private uploadInputBoxView =
         form [ _enctype "multipart/form-data"; _action "/api/upload"; _method "post"; _class "invisible-form" ] [
             div [ _class "input-group vertical invisible-form" ] [
                 div [ _class "inputAndButton" ] [
-                    input [ _type "text"; _class "transparent button-margin input-field width100percent"; _id "token"; _name "token"; _placeholder "Token" ]
+                    input [ _type "text"; _class "transparent button-margin input-field width100percent"; _id "token"; _name "token"; _placeholder "Token"; _oninput "resetValidation()"]
                     button [ _type "button"; _id "subaction-button"; _onclick "onValidationButtonClick()"; _class "action-button round-button" ] [ str "Validate" ]
                 ]
                 input [ _type "file"; _id "subaction-button"; _placeholder "Filename"; _name "file"; _class "file-chooser-margin" ]
@@ -172,7 +172,7 @@ let aboutView =
             ]
             br []
             p [] [
-                a [ _href "javascript:history.back()"; _class "centered-text margin-top-05em link-text" ] [ str "BACK"]
+                a [ _href "javascript:history.back()"; _class "centered-text margin-top-05em link-text" ] [ str "Return"]
             ]
             
         ]

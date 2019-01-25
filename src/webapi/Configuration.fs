@@ -15,7 +15,6 @@ type Configuration() =
         let mutable cleanExpiredDownloads: bool = false
         let mutable cronIntervalInHours: int = 24
         let mutable uploadsEnabled: bool = false
-        let mutable maxUploadSize: Int64 = Int64.MaxValue
         
         /// <summary>
         /// Use this Singleton to access the configuration from anywhere.
@@ -67,10 +66,3 @@ type Configuration() =
         member this.UploadsEnabled
             with get() = uploadsEnabled
             and set(value) = uploadsEnabled <- value
-            
-        /// <summary>
-        /// Sets the maximum size for file uploads in bytes.
-        /// </summary>
-        member this.MaxUploadSize
-            with get() = maxUploadSize
-            and set(value) = maxUploadSize <- value
