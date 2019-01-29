@@ -16,6 +16,11 @@ source scripts/git_release.sh
 echo "The working tag is: $NEW_TAG."
 
 #
+# Replace current version in source view.
+#
+perl -pi -e "s/(?<=You are running version: )\d.\d.\d/$NEW_TAG/;" src/webapi/Views.fs
+
+#
 # Create binaries.
 #
 source scripts/publish.sh
