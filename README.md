@@ -19,6 +19,10 @@ Disclaimer
 ----------
 Please note that I am not a security expert! This software is not built with security as its top-most priority. Use this software at your own risk and use common sense!
 
+Installation
+------------
+The easiest way to run torpedo is inside a docker container (see below). If you cannot or dont want to run a containere there are [Releases](https://github.com/b0wter/Torpedo/releases) for Linux, OSX and Windows. These are standalone releases that do not require the installation of the .Net CORE runtime.
+
 Setup downloads
 ---------------
 For each downloadable file in your downloads folder you need to create a text file with the extension ".token".
