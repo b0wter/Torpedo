@@ -10,7 +10,7 @@ The links will expire automatically based on either of two conditions:
 
 The project is in a fully usable state.
 
-![Screenshot](https://user-images.githubusercontent.com/614261/50368705-148f3280-058c-11e9-9482-2bb5810b88c0.png)
+![Screenshot](https://user-images.githubusercontent.com/614261/52147480-1ce88c00-2667-11e9-9985-7cecfd68ba9c.png)
 
 How To
 ======
