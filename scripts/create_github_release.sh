@@ -38,6 +38,7 @@ if [[ $RELEASES != *"$NEW_TAG"* ]]; then
 	curl --request POST --header "Authorization: token $GITHUB_ACCESS_KEY" --header "Content-Type: application/json" --data "{\"tag_name\": \"$NEW_TAG\",\"target_commitish\": \"master\"}" $REMOTE/repos/$OWNER/$PROJECT_NAME/releases | jq '.id'
 else
 	echo "The release exists."
+	exit 1
 fi
 
 # Get the upload_url for the release.

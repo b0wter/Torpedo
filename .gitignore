@@ -3,3 +3,4 @@ scripts/credentials.sh
 .idea/
 src/Database/
 Backend.sln.DotSettings.user
+*.DotSettings.user
