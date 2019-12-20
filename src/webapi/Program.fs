@@ -19,7 +19,7 @@ open Hangfire.MemoryStorage
 open Hangfire
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.AspNetCore.Http.Features
-
+open Microsoft.Extensions.Hosting
 // ---------------------------------
 // Web app
 // ---------------------------------
@@ -143,7 +143,7 @@ let configureCors (builder : CorsPolicyBuilder) =
            |> ignore
 
 let configureApp (app : IApplicationBuilder) =  
-    let env = app.ApplicationServices.GetService<IHostingEnvironment>()
+    let env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>()
     (match env.IsDevelopment() with
     | true  -> app.UseDeveloperExceptionPage()
     | false -> app.UseGiraffeErrorHandler errorHandler)

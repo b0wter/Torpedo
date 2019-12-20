@@ -110,12 +110,6 @@ let bind switchFunction =
         | Ok s -> switchFunction s
         | Error f -> Error f
                             
-[<Extension>]
-type System.String with
-    static member IsNotNullOrWhiteSpace(s: string): bool =
-        System.String.IsNullOrWhiteSpace(s) = false
-
-
 let requireParamterIn (get: string -> string option) (ctx: HttpContext) (required: string seq) (addToContext: bool) : HttpContext option =
     let parameters = required |> Seq.map (fun p -> (p, p |> get))
     

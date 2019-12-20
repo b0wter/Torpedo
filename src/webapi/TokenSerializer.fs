@@ -5,6 +5,7 @@ open System.Globalization
 open System.IO
 open WebApi.Tokens
 open WebApi.Helpers
+open b0wter.FSharp
 
 /// <summary>
 /// Defines the type of content used to deserialized from.
@@ -96,8 +97,8 @@ let deserializeTokenValue (content: string) : Result<TokenValue, string> =
 let deserializeToken (tokenFilename: string) (contentFilename: string) (content: TokenValueContent) : Result<Token, string> =
     let lines = match content with 
                 | AsLines l -> l
-                | AsTotal t -> t.Split(Environment.NewLine)
-                |> Array.filter String.IsNotNullOrWhiteSpace
+                | AsTotal t -> t.Split(System.Environment.NewLine)
+                |> Array.filter (String.isNullOrWhiteSpace >> not)
                 
     let parsed = lines
                  |> Array.map deserializeTokenValue                

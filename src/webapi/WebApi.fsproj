@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>torpedo</AssemblyName>
   </PropertyGroup>
 
@@ -27,12 +27,13 @@
     <PackageReference Include="Giraffe.Razor" Version="2.0.0" />
     <PackageReference Include="Hangfire" Version="1.6.21" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.5.3" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.4" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
+    <PackageReference Include="b0wter.FSharp" Version="*" />
   </ItemGroup>
 
   <ItemGroup>
