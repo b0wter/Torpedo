@@ -22,12 +22,12 @@ module WebApiTests.TokenSerializerTests
                 )
 
     [<Theory>]
-    [<InlineData("abcdef:2000-01-01 # This is a comment." )>]
-    [<InlineData("abcdef:2000-01-01# This is a comment." )>]
-    [<InlineData("abcdef:2000-01-01 #This is a comment." )>]
-    [<InlineData("abcdef:2000-01-01 : This is a comment." )>]
-    [<InlineData("abcdef:2000-01-01: This is a comment." )>]
-    [<InlineData("abcdef:2000-01-01 :This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01 # This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01# This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01 #This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01 ; This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01; This is a comment." )>]
+    [<InlineData("abcdef;2000-01-01 ;This is a comment." )>]
     let ``deserialize token with value, expiration date and comment`` token =
         token
         |> deserializeTokenTest
@@ -37,9 +37,9 @@ module WebApiTests.TokenSerializerTests
                 (fun comment -> comment |> should equal (Some "This is a comment."))
                 
     [<Theory>]
-    [<InlineData("abcdef:2000-01-01")>]
-    [<InlineData("abcdef: 2000-01-01")>]
-    [<InlineData("abcdef: 2000-01-01 ")>]
+    [<InlineData("abcdef;2000-01-01")>]
+    [<InlineData("abcdef; 2000-01-01")>]
+    [<InlineData("abcdef; 2000-01-01 ")>]
     let ``deserialize token with value and expiration date`` token =
         token
         |> deserializeTokenTest
@@ -60,9 +60,9 @@ module WebApiTests.TokenSerializerTests
     [<Fact>]
     let ``deserialize token with multiple values`` () =
         """
-        abcdef:2000-01-01
-        abcdef:2000-01-01
-        abcdef:2000-01-01
+        abcdef;2000-01-01
+        abcdef;2000-01-01
+        abcdef;2000-01-01
         """ 
         |> deserializeTokenTest
                 (fun length  -> length  |> should equal 3)
@@ -85,7 +85,7 @@ module WebApiTests.TokenSerializerTests
             }
         
         TokenSerializer.serializeToken token
-        |> should equal "abcdef:2000-01-01 # This is a comment."
+        |> should equal "abcdef;2000-01-01 00:00:00 # This is a comment."
         
     [<Fact>]
     let ``serialize token with value and expiration date`` () =
@@ -102,7 +102,7 @@ module WebApiTests.TokenSerializerTests
             }
         
         TokenSerializer.serializeToken token
-        |> should equal "abcdef:2000-01-01"
+        |> should equal "abcdef;2000-01-01 00:00:00"
         
     [<Fact>]
     let ``serialize token with value`` () =
