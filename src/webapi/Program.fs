@@ -17,18 +17,22 @@ open Hangfire.MemoryStorage
 open Hangfire
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.Extensions.Hosting
+
 // ---------------------------------
-// Web app
+// Global configuration
 // ---------------------------------
 
 let invariant = CultureInfo.InvariantCulture
 
 /// <summary>
-/// Checks if the file set as base path in the configuration file exists.
-/// This check is necessary due to a bug in the .net core 2.1 framework.
-/// Throwing an exception or using Environment.Exit(...) leads to a deadlock
-/// while shutting the application down.
+/// Creates a configuration from a local configuration file.
+/// Will also check environment variables.
 /// </summary>
+/// <remarks>
+/// Does not use the default ASP .Net core way of configuration because the configuration needs to be initialized
+/// before any other code is executed because functions like `downloadFile` are only initialized once.
+/// Any change in the configuration is not reflected in the curried function.
+/// </remarks>
 let updateConfigFromLocalFile =
     match Configuration.TryFromConfigFile "config.json" with
     | Some config ->
@@ -37,17 +41,10 @@ let updateConfigFromLocalFile =
         true
     | None ->
         false
-    
-    (*
-    if System.IO.File.Exists("config.json") then 
-        let config = System.IO.File.ReadAllText("config.json")
-                     |> JsonConvert.DeserializeObject<Configuration>
-        do Configuration.Instance <- config
-        true
-    else
-        false
-    *)
         
+// ---------------------------------
+// Web app
+// ---------------------------------
 let downloadFile =
     downloadWorkflow 
         Configuration.Instance.BasePath
