@@ -66,7 +66,7 @@ let requiresQueryParameters (parameters: string seq) (addToContex: bool) : HttpH
 /// <summary>
 /// Checks if the context contains a filename item and if that filename points to an existing file.
 /// </summary>
-let requiresExistanceOfFileInContext (basePath: string) : HttpHandler =
+let requiresExistenceOfFileInContext (basePath: string) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
             if ctx.Items.ContainsKey("filename") then 
@@ -101,7 +101,7 @@ let deserializeToken (pair : FileAccess.DownloadPair) : Result<Tokens.Token, Dow
     let result = tokenfile |> FileAccess.getTextContent |> TokenSerializer.AsTotal |> (TokenSerializer.deserializeToken tokenfile contentfile)
     match result with
     | Ok token  -> Ok token
-    | Error msg -> Error { StatusCode = 500; Reason = "Could not read the token file. Please contact the administrator." }
+    | Error _ -> Error { StatusCode = 500; Reason = "Could not read the token file. Please contact the administrator." }
     
 let checkTokenValue (value: string) (token: Tokens.Token) : Result<Tokens.Token, DownloadError> =
     let result = token.Values |> Seq.map (fun v -> v.Value) |> Seq.contains value
@@ -122,7 +122,7 @@ let downloadWorkflow (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeT
         task {
             let downloadPairFrom = (getDownloadPair downloadLifeTime tokenLifeTime)
             let rawFilename, tokenValue = (ctx.Items.["filename"].ToString(), ctx.Items.["token"].ToString())
-            let basePath, filename, fullFilename = rawFilename |> createCompletePathAndFilename basePath
+            let basePath, filename, _ = rawFilename |> createCompletePathAndFilename basePath
             
             let d = (downloadPairFrom basePath filename)
                     >>= deserializeToken
@@ -130,7 +130,9 @@ let downloadWorkflow (basePath: string) (downloadLifeTime: TimeSpan) (tokenLifeT
                     >>= (expireToken tokenValue tokenLifeTime)
                     >>= persistToken
           
+            // At this point the token is no longer needed but it is returned from the previous computation.
+            // It is sufficient to check for the happy path.
             match d with
-            | Ok token -> return! (getFileStreamResponseAsync basePath filename filename ctx next)
+            | Ok _ -> return! (getFileStreamResponseAsync basePath filename filename ctx next)
             | Error e  -> return! (failWithStatusCodeAndMessage ctx next e.StatusCode e.Reason next ctx)
         }
