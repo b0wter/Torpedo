@@ -66,3 +66,33 @@ type Configuration() =
         member this.UploadsEnabled
             with get() = uploadsEnabled
             and set value = uploadsEnabled <- value
+            
+        member this.MergeEnvironmentVariables () =
+            let nonParsable = System.Collections.Generic.List<string>(6)
+            let tryGet (key: string) map fallback =
+                let fullKey = $"TORPEDO_%s{key.ToUpper()}"
+                let r = Environment.GetEnvironmentVariable(fullKey)
+                if r |> String.IsNullOrWhiteSpace then fallback
+                else
+                    try
+                        map r
+                    with
+                    | _ ->
+                        do nonParsable.Add $"Could not override '%s{key}' because the value '%s{r}' could not be parsed. The default value '%A{fallback}' will be used." 
+                        fallback
+            this.BasePath               <- tryGet (nameof this.BasePath) id this.BasePath
+            this.UploadsEnabled         <- tryGet (nameof this.UploadsEnabled) bool.Parse this.UploadsEnabled
+            this.CleanExpiredDownloads  <- tryGet (nameof this.CleanExpiredDownloads) bool.Parse this.CleanExpiredDownloads
+            this.DownloadLifeTime       <- tryGet (nameof this.DownloadLifeTime) TimeSpan.Parse this.DownloadLifeTime
+            this.TokenLifeTime          <- tryGet (nameof this.TokenLifeTime) TimeSpan.Parse this.TokenLifeTime
+            this.CronIntervalInHours    <- tryGet (nameof this.CronIntervalInHours) Int32.Parse this.CronIntervalInHours
+            do nonParsable |> Seq.iter Console.WriteLine
+
+        static member TryFromConfigFile filename =
+            if System.IO.File.Exists(filename) then 
+                let config = System.IO.File.ReadAllText(filename)
+                             |> JsonConvert.DeserializeObject<Configuration>
+                Some config
+            else
+                None
+            
