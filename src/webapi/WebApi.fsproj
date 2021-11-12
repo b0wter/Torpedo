@@ -32,6 +32,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
     <PackageReference Include="b0wter.FSharp" Version="*" />
   </ItemGroup>
@@ -43,37 +45,102 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="wwwroot\css\custom.css" />
-    <Content Include="wwwroot\css\mini-dark.min.css" />
-    <Content Include="wwwroot\images\favicon\android-icon-144x144.png" />
-    <Content Include="wwwroot\images\favicon\android-icon-192x192.png" />
-    <Content Include="wwwroot\images\favicon\android-icon-36x36.png" />
-    <Content Include="wwwroot\images\favicon\android-icon-48x48.png" />
-    <Content Include="wwwroot\images\favicon\android-icon-72x72.png" />
-    <Content Include="wwwroot\images\favicon\android-icon-96x96.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-114x114.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-120x120.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-144x144.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-152x152.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-180x180.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-57x57.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-60x60.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-72x72.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-76x76.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon-precomposed.png" />
-    <Content Include="wwwroot\images\favicon\apple-icon.png" />
-    <Content Include="wwwroot\images\favicon\browserconfig.xml" />
-    <Content Include="wwwroot\images\favicon\favicon-16x16.png" />
-    <Content Include="wwwroot\images\favicon\favicon-32x32.png" />
-    <Content Include="wwwroot\images\favicon\favicon-96x96.png" />
-    <Content Include="wwwroot\images\favicon\favicon.ico" />
-    <Content Include="wwwroot\images\favicon\manifest.json" />
-    <Content Include="wwwroot\images\favicon\ms-icon-144x144.png" />
-    <Content Include="wwwroot\images\favicon\ms-icon-150x150.png" />
-    <Content Include="wwwroot\images\favicon\ms-icon-310x310.png" />
-    <Content Include="wwwroot\images\favicon\ms-icon-70x70.png" />
-    <Content Include="wwwroot\js\download.js" />
-    <Content Include="wwwroot\js\upload.js" />
+    <Content Include="wwwroot\css\custom.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\css\mini-dark.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-144x144.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-192x192.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-36x36.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-48x48.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-72x72.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\android-icon-96x96.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-114x114.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-120x120.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-144x144.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-152x152.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-180x180.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-57x57.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-60x60.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-72x72.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-76x76.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon-precomposed.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\apple-icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\browserconfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\favicon-16x16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\favicon-32x32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\favicon-96x96.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\ms-icon-144x144.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\ms-icon-150x150.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\ms-icon-310x310.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\images\favicon\ms-icon-70x70.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\js\download.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\js\upload.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
