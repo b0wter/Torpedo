@@ -8,7 +8,6 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open Newtonsoft.Json
 open WebApi
 open WebApi.DownloadHandler
 open WebApi.UploadHandler
@@ -31,6 +30,15 @@ let invariant = CultureInfo.InvariantCulture
 /// while shutting the application down.
 /// </summary>
 let updateConfigFromLocalFile =
+    match Configuration.TryFromConfigFile "config.json" with
+    | Some config ->
+        do config.MergeEnvironmentVariables ()
+        do Configuration.Instance <- config
+        true
+    | None ->
+        false
+    
+    (*
     if System.IO.File.Exists("config.json") then 
         let config = System.IO.File.ReadAllText("config.json")
                      |> JsonConvert.DeserializeObject<Configuration>
@@ -38,6 +46,7 @@ let updateConfigFromLocalFile =
         true
     else
         false
+    *)
         
 let downloadFile =
     downloadWorkflow 
@@ -70,14 +79,14 @@ let webApp =
         (* Route for the download api. *)
         route "/api/download"
             >=> requiresQueryParameters [| "filename"; "token" |] true
-            >=> requiresExistanceOfFile
+            >=> requiresExistenceOfFile
             >=> downloadFile 
         route "/api/download"
             >=> requiresQueryParameters [| "filename"; "token" |] true
             >=> (Views.notFoundView "The file could not be found." |> htmlView)
         route "/api/download"
             >=> requiresQueryParameters [| "filename" |] false
-            >=> requiresExistanceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
+            >=> requiresExistenceOfFile >=> (Views.badRequestView "Your request is missing the 'token' query parameter." |> htmlView)
         route "/api/download"
             >=> requiresQueryParameters [| "token" |] false
             >=> (Views.badRequestView "Your request is missing the 'filename' query parameter." |> htmlView)
