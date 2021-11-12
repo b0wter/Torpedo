@@ -43,7 +43,7 @@ let getFilesWithTokens =
                              Path.GetExtension
                              Path.Combine
     
-/// <summar>
+/// <summary>
 /// Reads text contents from a file. 
 /// Will throw exceptions if the file is unknown or the contents
 /// cannot be read.
