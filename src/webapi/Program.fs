@@ -45,8 +45,8 @@ let downloadFile =
         Configuration.Instance.DownloadLifeTime
         Configuration.Instance.TokenLifeTime
         
-let requiresExistanceOfFile =
-    requiresExistanceOfFileInContext
+let requiresExistenceOfFile =
+    requiresExistenceOfFileInContext
         Configuration.Instance.BasePath
         
 let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncResult =
