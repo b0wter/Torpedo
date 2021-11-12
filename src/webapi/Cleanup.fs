@@ -10,8 +10,8 @@ open WebApi.Tokens
 let private cleanFolder (downloadLifeTime: TimeSpan) (folder: FolderName) =
     let pairs = folder
                 |> getFilesWithTokens
-                |> Array.map (fun (tokenFileName, contentFileName) -> (tokenFileName |> WebApi.FileAccess.getTextContent |> AsTotal, tokenFileName, contentFileName))
-                |> Array.map (fun (tokenContent, tokenFileName, contentFileName) -> tokenContent |> TokenSerializer.deserializeToken tokenFileName contentFileName)
+                |> Array.map (fun (tokenFileName, contentFileName) -> (tokenFileName |> getTextContent |> AsTotal, tokenFileName, contentFileName))
+                |> Array.map (fun (tokenContent, tokenFileName, contentFileName) -> tokenContent |> deserializeToken tokenFileName contentFileName)
     
     do pairs
     |> filterErrors

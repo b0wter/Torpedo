@@ -1,7 +1,6 @@
 module WebApiTests.CleanupTests
 
 open Xunit
-open FsUnit.Xunit
 
 [<Fact>]
 let ``getAllSubFolders - lists all folders in directory`` () =

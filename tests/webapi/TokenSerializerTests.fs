@@ -2,13 +2,11 @@ module WebApiTests.TokenSerializerTests
     open Xunit
     open FsUnit.Xunit
     open WebApi.TokenSerializer
-    open WebApiTests.Helpers
     open System
-    open WebApi
     open WebApi.Tokens
     
     let private deserializeTokenTest (lengthAssert: int -> unit) (valueAssert: string -> unit) (dateAssert: DateTime option -> unit) (commentAssert: string option -> unit) (content: string) =
-        let token = WebApi.TokenSerializer.deserializeToken "dummy.filename" "dummy.content" (AsTotal content)
+        let token = deserializeToken "dummy.filename" "dummy.content" (AsTotal content)
         
         match token with 
         | Error _  -> failwith "Token could not be deserialized."
@@ -84,7 +82,7 @@ module WebApiTests.TokenSerializerTests
                 Token.ContentFilename = "content"
             }
         
-        TokenSerializer.serializeToken token
+        serializeToken token
         |> should equal "abcdef;2000-01-01 00:00:00 # This is a comment."
         
     [<Fact>]
@@ -101,7 +99,7 @@ module WebApiTests.TokenSerializerTests
                 Token.ContentFilename = "content"
             }
         
-        TokenSerializer.serializeToken token
+        serializeToken token
         |> should equal "abcdef;2000-01-01 00:00:00"
         
     [<Fact>]
@@ -118,6 +116,6 @@ module WebApiTests.TokenSerializerTests
                 Token.ContentFilename = "content"
             }
         
-        TokenSerializer.serializeToken token
+        serializeToken token
         |> should equal "abcdef"
         

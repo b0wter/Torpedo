@@ -1,13 +1,11 @@
 
 module WebApiTests.HelperTests
     open Xunit
-    open FsUnit.Xunit
     open System.Collections.Generic
     open WebApiTests
     open FsUnit
-    open System
     
-    type ``containsNone`` ()=
+    type containsNone ()=
         [<Fact>] member x.
          ``Seq with None element returns true`` ()=
             [ Some "string"; None; Some "test" ] |> Seq.ofList
@@ -26,7 +24,7 @@ module WebApiTests.HelperTests
             |> WebApi.Helpers.containsNone
             |> should be False
 
-    type ``containsError`` ()=
+    type containsError ()=
         [<Fact>] member x.
          ``Seq with Error element returns true`` ()=
             [ Ok "string"; Error "rekt" ; Ok "test" ] |> Seq.ofList
@@ -45,7 +43,7 @@ module WebApiTests.HelperTests
             |> WebApi.Helpers.containsError
             |> should be False
                 
-    type ``filterOks`` ()=
+    type filterOks ()=
         [<Fact>] member x.
          ``Seq with Error elements turns into Seq of results`` ()=
             let filtered = [ Ok "string"; Error "rekt" ; Ok "test" ] |> Seq.ofList |> WebApi.Helpers.filterOks in
@@ -56,7 +54,7 @@ module WebApiTests.HelperTests
             let filtered = [ Ok "string"; Ok "test" ] |> Seq.ofList |> WebApi.Helpers.filterOks in
                 filtered |> Seq.length |> should equal 2
             
-    type ``appendTo`` ()=
+    type appendTo ()=
         [<Fact>] member x.
          ``Dictionary with existing key appends value`` ()=
             let dict = Helpers.newDictionaryWith<obj, obj> [| ("key" :> obj, "value" :> obj) |] in
@@ -69,7 +67,7 @@ module WebApiTests.HelperTests
                 let value = (WebApi.Helpers.appendTo dict "key" "appended").["key"].ToString() in
                     value |> should equal "appended"
                 
-    type ``addIfNotExisting`` ()=
+    type addIfNotExisting ()=
         [<Fact>] member x.
          ``Dictionary with existing key does not add value`` ()=
             let dict = Helpers.newDictionaryWith<obj, obj> [| ("key" :> obj, "value" :> obj) |] in
@@ -82,12 +80,12 @@ module WebApiTests.HelperTests
                 let value = (WebApi.Helpers.addIfNotExisting dict "key" "appended").["key"].ToString() in
                     value |> should equal "appended"
                 
-    type ``splitAtPredicate`` ()=
+    type splitAtPredicate ()=
         [<Fact>] member x.
          ``True predicate splits the list (includeInFirst = true)`` ()=
             let items = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10 ] |> Seq.ofList in
                 let predicate = (fun i -> i = 5) in
-                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
+                    let left, right = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
                         let test = (fun () ->
                             do [ 1; 2; 3; 4; 5 ] |> List.iter (fun i -> left |> should contain i)
                             do [ 6; 7; 8; 9; 10 ] |> List.iter (fun i -> right |> should contain i)
@@ -98,7 +96,7 @@ module WebApiTests.HelperTests
          ``True predicate splits the list (includeInFirst = false)`` ()=
             let items = [ 1; 2; 3; 4; 5; 6; 7; 8; 9; 10 ] |> Seq.ofList in
                 let predicate = (fun i -> i = 5) in
-                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate false) in
+                    let left, right = items |> (WebApi.Helpers.splitAtPredicate id id predicate false) in
                         let test = (fun () ->
                             do [ 1; 2; 3; 4; ] |> List.iter (fun i -> left |> should contain i)
                             do [ 5; 6; 7; 8; 9; 10 ] |> List.iter (fun i -> right |> should contain i)
@@ -109,7 +107,7 @@ module WebApiTests.HelperTests
          ``Always false Predicate returns full seq`` ()=
             let items = [ 1; 2; 3; 4; 6; 7; 8; 9; 10 ] |> Seq.ofList in
                 let predicate = (fun _ -> false) in
-                    let (left, right) = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
+                    let left, right = items |> (WebApi.Helpers.splitAtPredicate id id predicate true) in
                         let test = (fun () ->
                             do left |> List.ofSeq |> should haveLength 9
                         ) in 

@@ -1,10 +1,6 @@
 module WebApi.Views
 
-open System.Net
-open System.Threading.Tasks
-open FSharp.Control.Tasks.V2.ContextInsensitive
-open Giraffe
-open Giraffe.GiraffeViewEngine
+open Giraffe.ViewEngine
 
 let private headTags (scripts: string list) =
     [

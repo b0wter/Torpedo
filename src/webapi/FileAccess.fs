@@ -4,7 +4,7 @@ open System.IO
 
 type ContentFilename = string
 type TokenFilename = string
-type DownloadPair = (TokenFilename * ContentFilename)
+type DownloadPair = TokenFilename * ContentFilename
 
 /// <summary>
 /// File extension for tokens.
@@ -24,7 +24,7 @@ let customGetFilesWithTokens (getFilesInFolder: FolderName -> FileName [])
                              (getFileNameWithoutExtension: FileName -> string) 
                              (getFileName: FileName -> string) 
                              (getFileExtension: FileName -> string) 
-                             (pathCombinator: (Path * Path) -> Path)
+                             (pathCombinator: Path * Path -> Path)
                              (folder: FolderName)
                                  : DownloadPair[] =
     getFilesInFolder(folder)
@@ -76,7 +76,7 @@ let getFileDates (filenames: FileName seq) =
 /// Checks if the given file is downloadable meaning a matching Token file exists
 /// and the Token is uniquely bound to a single content file.
 /// </summary>
-let customExistsIn (getFilesWithTokens: FolderName -> DownloadPair []) (pathCombinator: (string * string) -> string) (folder: FolderName) (filename: FileName): bool =
+let customExistsIn (getFilesWithTokens: FolderName -> DownloadPair []) (pathCombinator: string * string -> string) (folder: FolderName) (filename: FileName): bool =
     if folder.Contains("..") || filename.Contains("..") then 
         false 
     else
@@ -85,7 +85,7 @@ let customExistsIn (getFilesWithTokens: FolderName -> DownloadPair []) (pathComb
         |> Array.contains (pathCombinator(folder, filename))
     
 let existsIn =
-    customExistsIn (getFilesWithTokens) Path.Combine
+    customExistsIn getFilesWithTokens Path.Combine
     
 /// <summary>
 /// Interprets the filename as a combination of directory and filename and checks if it exists.
@@ -121,7 +121,7 @@ let fileStream (folder: FolderName) (filename: FileName): FileStream option =
 /// <summary>
 /// Writes the given content into the given file using the default character encoding.
 /// </summary>
-let customPersistStringAsFile (persistor: (string * string) -> unit) (filename: Path) (content: string) : bool =
+let customPersistStringAsFile (persistor: string * string -> unit) (filename: Path) (content: string) : bool =
     try
         persistor(filename, content)
         true
@@ -157,7 +157,7 @@ let customGetFilesFromFolder (listFiles: string -> string array) (selector: stri
     
 let getFilesFromFolder =
     customGetFilesFromFolder
-        IO.Directory.GetFiles
+        Directory.GetFiles
         (fun s -> Path.GetFileName(s) = ".token")
         (fun _ -> fun b -> b)
         

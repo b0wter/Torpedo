@@ -1,6 +1,5 @@
 module WebApiTests.FileAccessTests
 
-open System
 open System.IO
 open Xunit
 open FsUnit.Xunit
@@ -72,10 +71,10 @@ let ``customGetFilesWithTokens with empty file list returns empty array`` () =
 [<InlineData("test.file", "test.token", "dummy_folder", "test.file", true)>]
 [<InlineData("test.file", "test.token", "", "test.file", true)>]
 let ``existsIn with different valid and invalid file/folder names returns expected result`` localFile localToken basePath requestedFile expected =
-    let combinator filename = IO.Path.Combine(basePath, filename)
+    let combinator filename = Path.Combine(basePath, filename)
     
     WebApi.FileAccess.customExistsIn (fun _ -> [| (localToken |> combinator , localFile |> combinator ) |])
-                                     (Path.Combine)
+                                     Path.Combine
                                      basePath
                                      requestedFile
     |> should equal expected

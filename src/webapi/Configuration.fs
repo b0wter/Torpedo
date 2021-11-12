@@ -22,14 +22,14 @@ type Configuration() =
         [<JsonIgnore>]
         static member Instance 
             with get() = instance
-            and set(value) = instance <- value
+            and set value = instance <- value
         
         /// <summary>
         /// Path to the downloads folder.
         /// </summary>
         member this.BasePath
             with get() = basePath
-            and  set(value) = basePath <- value
+            and  set value = basePath <- value
             
         /// <summary>
         /// Lifetime of a download. The check is done against the current time and the last time
@@ -37,32 +37,32 @@ type Configuration() =
         /// </summary>
         member this.DownloadLifeTime
             with get() = downloadLifeTime
-            and  set(value) = downloadLifeTime <- value
+            and  set value = downloadLifeTime <- value
             
         /// <summary>
         /// Lifetime of a download once the first download attempt has been started.
         /// </summary>
         member this.TokenLifeTime
             with get() = tokenLifeTime
-            and  set(value) = tokenLifeTime <- value
+            and  set value = tokenLifeTime <- value
 
         /// <summary>
         /// Gets/sets wether the expired downloads are periodically deleted.
         /// </summary>
         member this.CleanExpiredDownloads
             with get() = cleanExpiredDownloads
-            and set(value) = cleanExpiredDownloads <- value
+            and set value = cleanExpiredDownloads <- value
             
         /// <summary>
         /// Interval in which the downloads are cleared. Given in hours.
         /// </summary>
         member this.CronIntervalInHours
             with get() = cronIntervalInHours
-            and set(value) = cronIntervalInHours <- value
+            and set value = cronIntervalInHours <- value
             
         /// <summary>
         /// Enables the upload feature.
         /// </summary>
         member this.UploadsEnabled
             with get() = uploadsEnabled
-            and set(value) = uploadsEnabled <- value
+            and set value = uploadsEnabled <- value

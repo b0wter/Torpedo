@@ -1,6 +1,8 @@
 out/
 scripts/credentials.sh
 .idea/
+.vscode/
+.ionide/
 src/Database/
 Backend.sln.DotSettings.user
 *.DotSettings.user

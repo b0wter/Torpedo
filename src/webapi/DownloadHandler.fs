@@ -28,10 +28,10 @@ let private getFileStreamResponseAsync folder file downloadname (ctx: HttpContex
             let disposition = System.Net.Mime.ContentDisposition(FileName = downloadname, Inline = false)
             do ctx.Response.Headers.Add("Content-Disposition", StringValues(disposition.ToString()));
             return! ctx.WriteStreamAsync
-                true 
-                stream
-                None
-                None
+                (true,
+                 stream,
+                 None,
+                 None)
         | None ->
             //return! (failWithStatusCodeAndMessage ctx next 500 "Download stream not set. Please contact the administrator.")
             return! next ctx
@@ -58,7 +58,7 @@ let private createCompletePathAndFilename basePath filename =
 let requiresQueryParameters (parameters: string seq) (addToContex: bool) : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            match Helpers.requireParamterIn (ctx.TryGetQueryStringValue) ctx parameters addToContex with
+            match requireParamterIn ctx.TryGetQueryStringValue ctx parameters addToContex with
             | Some context -> return! next context
             | None         -> return None
         }
@@ -84,12 +84,12 @@ let requiresExistanceOfFileInContext (basePath: string) : HttpHandler =
         
         
 let (>>=) twoTrackInput switchFunction =
-    Helpers.bind switchFunction twoTrackInput
+    bind switchFunction twoTrackInput
         
 let getDownloadPair (downloadLifeTime : TimeSpan) (tokenLifeTime : TimeSpan) path filename : Result<FileAccess.DownloadPair, DownloadError> =
     let pair = path 
                |> FileAccess.getFilesWithTokens
-               |> Helpers.mappedFilter (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
+               |> mappedFilter (fun (tokenfile, contentfile) -> (FileAccess.getLastModified tokenfile, (tokenfile, contentfile)))
                                        (fun (lastmodified, _) -> (DateTime.Now - downloadLifeTime) <= lastmodified)
                |> Seq.tryFind (fun (_, contentfile) -> IO.Path.GetFileName(contentfile) = filename)
     match pair with

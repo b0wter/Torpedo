@@ -12,12 +12,10 @@ open Newtonsoft.Json
 open WebApi
 open WebApi.DownloadHandler
 open WebApi.UploadHandler
-open WebApi.HttpHandlers
 open WebApi.Helpers
 open WebApi.Configuration
 open Hangfire.MemoryStorage
 open Hangfire
-open Microsoft.AspNetCore.Http.Features
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.Extensions.Hosting
 // ---------------------------------
@@ -58,8 +56,8 @@ let uploadFile : HttpFunc -> Microsoft.AspNetCore.Http.HttpContext -> HttpFuncRe
 let validateUploadTokenAndExit : HttpHandler =
     validateUploadToken
         Configuration.Instance.BasePath
-        (fun next ctx -> ("true" |> Giraffe.ResponseWriters.text) next ctx)
-        (fun next ctx -> ("false" |> Giraffe.ResponseWriters.text) next ctx)
+        (fun next ctx -> ("true" |> Core.text) next ctx)
+        (fun next ctx -> ("false" |> Core.text) next ctx)
         
 let validateUploadTokenAndContinue : HttpHandler =
     validateUploadToken
@@ -143,13 +141,12 @@ let configureCors (builder : CorsPolicyBuilder) =
            |> ignore
 
 let configureApp (app : IApplicationBuilder) =  
-    let env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>()
+    let env = app.ApplicationServices.GetService<IWebHostEnvironment>()
     (match env.IsDevelopment() with
     | true  -> app.UseDeveloperExceptionPage()
     | false -> app.UseGiraffeErrorHandler errorHandler)
         .UseHttpsRedirection()
         .UseStaticFiles()
-        .UseHangfireServer()
         .UseCors(configureCors)
         .UseGiraffe(webApp)
 
@@ -157,10 +154,11 @@ let configureServices (services : IServiceCollection) =
     services.AddHangfire(
         fun c -> 
             c.UseMemoryStorage() |> ignore
-            do RecurringJob.AddOrUpdate((fun () -> do cleanOldDownloads ()), Cron.HourInterval Configuration.Instance.CronIntervalInHours)
+            do RecurringJob.AddOrUpdate((fun () -> do cleanOldDownloads ()), Cron.Hourly Configuration.Instance.CronIntervalInHours)
         ) |> ignore
-    services.AddCors()    |> ignore
+    services.AddCors() |> ignore
     services.AddGiraffe() |> ignore
+    services.AddHangfireServer() |> ignore
     services.Configure<FormOptions>(fun (x: FormOptions) -> x.ValueLengthLimit <- Int32.MaxValue
                                                             x.MultipartBodyLengthLimit <- Int64.MaxValue)
     |> ignore
@@ -170,7 +168,7 @@ let configureLogging (builder : ILoggingBuilder) =
            .AddConsole()
            .AddDebug() |> ignore
 
-/// <summar>
+/// <summary>
 /// Prints a highlighted error message and then returns an error exit code.
 /// Flushes the console output stream to make sure the colors are reset properly.
 /// </summary>

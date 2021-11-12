@@ -7,7 +7,7 @@ open FsUnit.Xunit
 let ``takeMax with empty seq returns empty seq`` () =
     Seq.empty<int>
     |> Seq.takeMax 1
-    |> should equal (Seq.empty<int>)
+    |> should equal Seq.empty<int>
     
 [<Fact>]
 let ``takeMax with longer seq returns specified number of items`` () =
@@ -40,7 +40,7 @@ let ``takeMax smaller seq item count returns full seq`` () =
 let ``skipOrEmpty with empty seq returns empty seq`` () =
     Seq.empty<int>
     |> Seq.skipOrEmpty 1
-    |> should equal (Seq.empty<int>)
+    |> should equal Seq.empty<int>
 
 [<Fact>]
 let ``skipOrEmpty with enough items in seq skips items`` () =
@@ -55,4 +55,4 @@ let ``skipOrEmpty with enough items in seq skips items`` () =
 let ``skipOrEmpty with matching item count returns empty seq`` () =
     [ 1; 2; 3; 4; 5; ]
     |> Seq.skipOrEmpty 5
-    |> should equal (Seq.empty<int>)   
+    |> should equal Seq.empty<int>   

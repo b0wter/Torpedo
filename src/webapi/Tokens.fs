@@ -1,7 +1,6 @@
 module WebApi.Tokens
 
 open System
-open System
 
 /// <summary>
 /// Part of a Token. A TokenValue represents a single value with its own expiration date.
