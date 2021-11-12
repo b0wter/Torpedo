@@ -33,7 +33,6 @@ let private getFileStreamResponseAsync folder file downloadname (ctx: HttpContex
                  None,
                  None)
         | None ->
-            //return! (failWithStatusCodeAndMessage ctx next 500 "Download stream not set. Please contact the administrator.")
             return! next ctx
             
     }
@@ -44,7 +43,7 @@ let private getFileStreamResponseAsync folder file downloadname (ctx: HttpContex
 /// </summary>
 /// <remarks>
 /// This is useful because the filename might contains a relative path oder a folder name.
-/// </summary>        
+/// </remarks>        
 let private createCompletePathAndFilename basePath filename =
     let fullpath = IO.Path.Combine(basePath, filename)
     let basePath = IO.Path.GetDirectoryName(fullpath)
