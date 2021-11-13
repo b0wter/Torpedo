@@ -28,5 +28,6 @@ jobs:
           tag: latest
           imageName: b0wter/torpedo
           context: src/webapi/
-          dockerFile: src/webapi/Dockerfile
+          dockerFile: src/webapi/Dockerfile.arm32
+          platform: linux/arm/v7
           
