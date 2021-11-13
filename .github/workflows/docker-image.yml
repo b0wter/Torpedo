@@ -25,7 +25,12 @@ jobs:
         name: bash
         uses: jcblw/bash@1.0.0
         with:
-          args: ls -la
+          args: ls
+      - 
+        name: bash
+        uses: jcblw/bash@1.0.0
+        with:
+          args: cd src/webapi
       -
         name: Customizable Docker Buildx Build
         uses: zmingxie/docker_buildx@v1.1
