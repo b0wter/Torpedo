@@ -18,9 +18,14 @@ jobs:
         name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          install: true
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+      -
+        name: foo
+        run: ls -la /usr/share/dotnet/host/fxr
       -
         name: Customizable Docker Buildx Build
         uses: ilteoood/docker_buildx@1.0.5
