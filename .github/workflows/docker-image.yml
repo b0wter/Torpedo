@@ -27,7 +27,6 @@ jobs:
         with:
           tag: latest
           imageName: b0wter/torpedo
-          working-directory: src/webapi
           context: src/webapi/
           dockerFile: src/webapi/Dockerfile
           
