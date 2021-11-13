@@ -4,6 +4,7 @@ on:
   push:
 
 jobs:
+  
   buildx:
     runs-on: ubuntu-latest
     steps:
@@ -20,3 +21,13 @@ jobs:
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+      -
+        name: Customizable Docker Buildx Build
+        uses: zmingxie/docker_buildx@v1.1
+        with:
+          tag: latest
+          imageName: b0wter/torpedo
+          working-directory: src/webapi
+          platform: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6
+          
+          
