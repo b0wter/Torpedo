@@ -14,7 +14,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 COPY config_docker.json ./config.json
-#RUN mkdir wwwroot
-#RUN mkdir content
-#COPY wwwroot ./wwwroot
 ENTRYPOINT ["dotnet", "torpedo.dll"]
