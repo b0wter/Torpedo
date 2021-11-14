@@ -3,6 +3,7 @@ WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY src/webapi/*.fsproj ./
+RUN ls -la /usr/share/dotnet/host/fxr
 RUN dotnet restore
 
 # Copy everything else and build
