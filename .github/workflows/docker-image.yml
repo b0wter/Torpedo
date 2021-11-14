@@ -32,5 +32,5 @@ jobs:
         with:
           tag: latest
           imageName: b0wter/torpedo
-          platform: linux/arm/v7
+          platform: linux/arm64
           
