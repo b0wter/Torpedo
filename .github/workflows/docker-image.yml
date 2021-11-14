@@ -27,12 +27,10 @@ jobs:
         name: foo
         run: ls -la /usr/share/dotnet/host/fxr
       -
-        name: Customizable Docker Buildx Build
+        name: Build Docker images
         uses: ilteoood/docker_buildx@1.0.5
         with:
           tag: latest
           imageName: b0wter/torpedo
-          context: src/webapi/
-          dockerFile: src/webapi/Dockerfile.arm32
           platform: linux/arm/v7
           
