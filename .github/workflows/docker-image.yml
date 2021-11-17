@@ -26,6 +26,8 @@ jobs:
       -
         name: foo
         run: ls -la /usr/share/dotnet/host/fxr
+      - name: buildx
+        run: docker buildx build -t b0wter/torpedo --platform linux/amd64,linux/arm64 .
       -
         name: Build Docker images
         uses: ilteoood/docker_buildx@1.0.5
