@@ -6,3 +6,5 @@ scripts/credentials.sh
 src/Database/
 Backend.sln.DotSettings.user
 *.DotSettings.user
+
+.fake
