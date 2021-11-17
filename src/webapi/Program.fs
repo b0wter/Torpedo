@@ -25,6 +25,24 @@ open Microsoft.Extensions.Hosting
 let invariant = CultureInfo.InvariantCulture
 
 /// <summary>
+/// Tries to retrieve the configuration filename from the environment variables.
+/// Returns a fallback value if the variable is not set.
+/// </summary>
+let getConfigFile ()  =
+    let fallbackName = "config.json"
+    try
+        let configFilename = Environment.GetEnvironmentVariable("TORPEDO_CONFIG")
+        if configFilename |> String.IsNullOrWhiteSpace then
+            printfn "Configuration file not specified through the environment. Will use fallback value '%s'." fallbackName
+            fallbackName
+        else
+            configFilename
+    with
+    | :? Security.SecurityException ->
+        printfn "The current user does not have access to the environment variables. Using default configuration file '%s'." fallbackName
+        fallbackName
+        
+/// <summary>
 /// Creates a configuration from a local configuration file.
 /// Will also check environment variables.
 /// </summary>
@@ -34,12 +52,12 @@ let invariant = CultureInfo.InvariantCulture
 /// Any change in the configuration is not reflected in the curried function.
 /// </remarks>
 let updateConfigFromLocalFile =
-    match Configuration.TryFromConfigFile "config.json" with
-    | Some config ->
-        do config.MergeEnvironmentVariables ()
+    let filename = getConfigFile ()
+    let config = filename |> Configuration.FromConfigAndEnvironment 
+    if config.IsValid then
         do Configuration.Instance <- config
         true
-    | None ->
+    else
         false
         
 // ---------------------------------
@@ -201,11 +219,8 @@ let buildKestrel () =
 [<EntryPoint>]
 let main _ =
     if updateConfigFromLocalFile then 
-        if Configuration.Instance.BasePath |> System.IO.Directory.Exists then
-            let host = buildKestrel ()
-            do host.Run ()
-            0
-        else 
-            exitWithError (sprintf "The 'BasePath' set in your 'config.json' does not exist or is not accesible.%sValue: %s" Environment.NewLine Configuration.Instance.BasePath)
+        let host = buildKestrel ()
+        do host.Run ()
+        0
     else
-        exitWithError "Could not find 'config.json' in the application startup path."
+        exitWithError "The configuration is missing the `BasePath` property."

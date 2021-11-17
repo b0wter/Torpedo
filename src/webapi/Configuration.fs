@@ -67,6 +67,18 @@ type Configuration() =
             with get() = uploadsEnabled
             and set value = uploadsEnabled <- value
             
+        /// <summary>
+        /// Returns whether the configuration is valid.
+        /// The only required value is `BasePath`.
+        /// Every other setting is optional and can be initialized with a meaningful default.
+        /// </summary>
+        /// <returns>
+        /// `true` if `BasePath` is set;
+        /// `false` otherwise
+        /// </returns>
+        member this.IsValid =
+            this.BasePath |> (not << String.IsNullOrWhiteSpace)
+            
         member this.MergeEnvironmentVariables () =
             let nonParsable = System.Collections.Generic.List<string>(6)
             let tryGet (key: string) map fallback =
@@ -75,6 +87,7 @@ type Configuration() =
                 if r |> String.IsNullOrWhiteSpace then fallback
                 else
                     try
+                        printfn "Found envrionment variable for %s." key
                         map r
                     with
                     | _ ->
@@ -87,7 +100,13 @@ type Configuration() =
             this.TokenLifeTime          <- tryGet (nameof this.TokenLifeTime) TimeSpan.Parse this.TokenLifeTime
             this.CronIntervalInHours    <- tryGet (nameof this.CronIntervalInHours) Int32.Parse this.CronIntervalInHours
             do nonParsable |> Seq.iter Console.WriteLine
-
+            
+        /// <summary>
+        /// Tries to create configuration by deserializing a given file.
+        /// </summary>
+        /// <returns>
+        /// `Some config` if the file exists and is a valid configuration; `None` otherwise.
+        /// </returns>
         static member TryFromConfigFile filename =
             if System.IO.File.Exists(filename) then 
                 let config = System.IO.File.ReadAllText(filename)
@@ -95,4 +114,20 @@ type Configuration() =
                 Some config
             else
                 None
+
+        /// <summary>
+        /// Creates a new configuration that tries to deserialize a configuration from a file and then applies
+        /// environmental variables.
+        /// Will use a default initialization if the configuration file does not exist.
+        /// </summary>
+        static member FromConfigAndEnvironment filename =
+            let config = match filename |> Configuration.TryFromConfigFile with
+                         | Some c -> c
+                         | None ->
+                             printfn "Did not find configuration file. A default configuration will be used instead. Environment variables are still applied."
+                             Configuration()
+            do config.MergeEnvironmentVariables()
+            config
+            
+
             
