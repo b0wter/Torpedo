@@ -21,7 +21,7 @@ Please note that I am not a security expert! This software is not built with sec
 
 Installation
 ------------
-The easiest way to run torpedo is inside a docker container (see below). If you cannot or dont want to run a containere there are [Releases](https://github.com/b0wter/Torpedo/releases) for Linux, OSX and Windows. These are standalone releases that do not require the installation of the .Net CORE runtime.
+The easiest way to run torpedo is inside a docker container (see below). If you cannot or don't want to run a containere there are [Releases](https://github.com/b0wter/Torpedo/releases) for Linux, OSX and Windows. These are standalone releases that do not require the installation of the .Net CORE runtime.
 
 Setup downloads
 ---------------
@@ -127,7 +127,23 @@ You will either receive "true" or "false" as result.
 
 Configuration
 =============
-The application needs a configuration file to work properly. The file is written in json and looks like this:
+Torpedo supports the following configuration options:
+
+* *BasePath*: needs to point to the directory you want to use to serve files.
+* *DownloadLifetime*: Expiration time of a download. This is counted from the moment you create the token file (using the last written timestamp). Given in the format $DAYS:HOURS:MINUTES:SECONDS.
+* *TokenLifetime*: Expiration time of a single token value. This is set the moment the first user uses this token. Given in the format $DAYS:HOURS:MINUTES:SECONDS.
+* *CleanExpiredDownloads*: Makes Torpedo periodically check all downloads and delete the token and content files for expired downloads.
+* *CronIntervalInHours*: Interval in which the aforementioned action is performed. Given in hours.
+* *UploadsEnabled*: Enables the upload feature for remote users. Note that you will still need to create upload tokens manually.
+* *MaxUploadSize*: Maximum size of uploads, given in bytes. Please note that the framework currently limits Torpedo to an upload size of about 1.5 GB.
+
+Only the `BasePath` setting is required to run torpedo (all other settings can be initialized in a meaningful way).
+
+The application takes parameters from two sources:
+
+Configuration file
+------------------
+On startup the application looks for a `config.json` (you can specify another filename by setting the environment variable `TORPEDO_CONFIG`). Here is a sample of a complete configuration:
 ```
 {
 	"BasePath": "/home/b0wter/tmp/torpedo",
@@ -138,19 +154,43 @@ The application needs a configuration file to work properly. The file is written
 	"UploadsEnabled": false,
 	"MaxUploadSize": 1073741824
 }
-
 ```
 
-* *BasePath*: needs to point to the directory you want to use to serve files.
-* *DownloadLifetime*: Expiration time of a download. This is counted from the moment you create the token file (using the last written timestamp). Given in the format $DAYS:HOURS:MINUTES:SECONDS.
-* *TokenLifetime*: Expiration time of a single token value. This is set the moment the first user uses this token. Given in the format $DAYS:HOURS:MINUTES:SECONDS.
-* *CleanExpiredDownloads*: Makes Torpedo periodically check all downloads and delete the token and content files for expired downloads.
-* *CronIntervalInHours*: Interval in which the aforementioned action is performed. Given in hours.
-* *UploadsEnabled*: Enables the upload feature for remote users. Note that you will still need to create upload tokens manually.
-* *MaxUploadSize*: Maximum size of uploads, given in bytes. Please note that the framework currently limits Torpedo to an upload size of about 1.5 GB.
+Environment variables
+---------------------
+All settings can also be set by using environment variables. Prepend the setting key with `TORPEDO_` (e.g. `TORPEDO_BASEPATH`).
+
+You can override configuration settings with environment variables by prefixing the setting name with `TORPEDO_` e.g. `TORPEDO_BASEPATH`.
 
 Docker
 ======
+Prebuilt Docker images are available through [Docker Hub](https://hub.docker.com/repository/docker/b0wter/torpedo). You can also build your own images with the `Dockerfile` in the project root. You can configure the container by injecting a config file into the container (e.g. by using `mount`) or set environment variables.
+
+```
+docker run -d --restart=always -p 8080:80 --mount type=bind,source=/home/b0wter/tmp/torpedo,target=/app/content/ -e TORPEDO_BASEPATH=/app/content --name mytorpedo b0wter/torpedo
+```
+
+Alternatively, you can use this `docker-compose.yml` (change the `volume` to match a folder on your host system):
+
+```
+version: "3"
+
+services:
+  torpedo:
+    container_name: mytorpedo
+    image: b0wter/torpedo
+    ports:
+      - "8080:80/tcp"
+    environment:
+      TZ: 'Europe/Berlin'
+      TORPEDO_BASEPATH: /app/content
+    volumes:
+      - $PWD/content:/app/content
+    restart: unless-stopped
+
+```
+
+
 To use Torpedo from inside a Docker container you'll need to do the following:
 
 * Create folder on your host system for your downloads, e.g. `/srv/torpedo`.
@@ -168,7 +208,7 @@ To build your own image you only need the docker runtime. Run the following comm
 docker build -t torpedo .
 ```
 
-Images are auto-generated from this repository and can be found on [Docker Hub](https://hub.docker.com/r/b0wter/torpedo).
+Images (`linux/amd64` & `linux/arm64`) are auto-generated from this repository and can be found on [Docker Hub](https://hub.docker.com/r/b0wter/torpedo).
 
 
 HTTPS
